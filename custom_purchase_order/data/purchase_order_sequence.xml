@@ -1,0 +1,21 @@
+<odoo>
+    
+   <record id="local_purchase_order_sequence" model="ir.sequence">
+        <field name="name">Local Purchase Order</field>
+        <field name="code">local.purchase.order.sequence</field>
+        <field name="prefix">PO-L</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        
+    </record>
+
+    <!-- Sequence for Foreign Purchase Orders -->
+    <record id="foreign_purchase_order_sequence" model="ir.sequence">
+        <field name="name">Foreign Purchase Order</field>
+        <field name="code">foreign.purchase.order.sequence</field>
+        <field name="prefix">PO-F</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        
+    </record>
+</odoo>

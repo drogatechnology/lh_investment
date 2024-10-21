@@ -1,0 +1,72 @@
+<odoo>
+
+    <!-- Actions for Local Purchase Orders -->
+    <record id="action_local_purchase_order" model="ir.actions.act_window">
+        <field name="name">Local Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('purchase_type', '=', 'local')]</field>
+        <field name="context">{'purchase_type': 'local'}</field> <!-- Pass context -->
+    </record>
+
+    <!-- Actions for Foreign Purchase Orders -->
+    <record id="action_foreign_purchase_order" model="ir.actions.act_window">
+        <field name="name">Foreign Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('purchase_type', '=', 'foreign')]</field>
+        <field name="context">{'purchase_type': 'foreign'}</field> <!-- Pass context -->
+    </record>
+
+    <record id="view_purchase_order_form" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <form string="Purchase Order">
+                <header>
+                    
+                </header>
+                <sheet>
+                    
+                    <field name="company_id" invisible="1"/>
+                    <group>
+                        
+                    </group>
+                </sheet>
+            </form>
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="rfq_request_id" string="RFQ Reference" options="{'no_open': False}"/>
+
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Parent Menu for Local Procurement -->
+    <record id="local_procurement_menu" model="ir.ui.menu">
+        <field name="name">Local Procurement</field>
+        <field name="parent_id" ref="purchase.menu_purchase_root"/>
+        <field name="sequence" eval="10"/>
+    </record>
+
+    <!-- Foreign Procurement Menu -->
+    <record id="foreign_procurement_menu" model="ir.ui.menu">
+        <field name="name">Foreign Procurement</field>
+        <field name="parent_id" ref="purchase.menu_purchase_root"/>
+        <field name="sequence" eval="20"/>
+    </record>
+
+    <!-- Menu for Local Purchase Orders -->
+    <record id="local_purchase_order_menu" model="ir.ui.menu">
+        <field name="name">Local Purchase Order</field>
+        <field name="parent_id" ref="local_procurement_menu"/>
+        <field name="action" ref="action_local_purchase_order"/>
+    </record>
+
+    <!-- Menu for Foreign Purchase Orders -->
+    <record id="foreign_purchase_order_menu" model="ir.ui.menu">
+        <field name="name">Foreign Purchase Order</field>
+        <field name="parent_id" ref="foreign_procurement_menu"/>
+        <field name="action" ref="action_foreign_purchase_order"/>
+    </record>
+</odoo>

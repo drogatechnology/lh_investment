@@ -1,0 +1,11 @@
+<odoo>
+   <record id="action_report_local_rfq" model="ir.actions.report">
+        <field name="name">Local RFQ Report</field>
+        <field name="model">local.create.rfq</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_purchase_order.report_template_name</field>
+        <field name="report_file">custom_purchase_order.report_template_name</field>
+    </record>
+
+
+</odoo>

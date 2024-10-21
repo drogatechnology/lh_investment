@@ -1,0 +1,116 @@
+<odoo>
+    <record id="action_local_purchase_request" model="ir.actions.act_window">
+        <field name="name">Local Purchase Requests</field>
+        <field name="res_model">local.purchase.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_local_purchase_request_form" model="ir.ui.view">
+        <field name="name">local.purchase.request.form</field>
+        <field name="model">local.purchase.request</field>
+        <field name="arch" type="xml">
+            <form string="Local Purchase Request">
+                <header>
+                    <!-- Submit button, visible in 'draft' state -->
+                    <button name="action_submit" type="object" string="Submit" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+
+                    <!-- Approve button, visible in 'submitted' state -->
+                    <button name="action_approve" type="object" string="Approve" class="btn-success"
+                            attrs="{'invisible': [('state', '!=', 'submitted')]}"/>
+
+                    <!-- Done button, visible in 'approved' state -->
+                    <button name="action_done" type="object" string="Mark as Done" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'approved')]}"/>
+
+                    <!-- Cancel button, visible in 'submitted' or 'approved' state -->
+                    <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
+                            attrs="{'invisible': [('state', 'not in', ('submitted', 'approved'))]}"/>
+
+                    <!-- Status bar including all states -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,done,cancelled"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Create RFQ Button (now using the computed field for visibility) -->
+                        <button class="oe_stat_button" name="custom_create_function" type="object"
+                                icon="fa-file-text-o"
+                                attrs="{'invisible': [('show_create_rfq_button', '=', False), ('state', '!=', 'approved')]}">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value">Create RFQ</span>
+                            </div>
+                        </button>
+
+                        <!-- View RFQ Button (visible only if RFQ is created, showing count) -->
+                        <button class="oe_stat_button" name="return_list" type="object"
+                                icon="fa-file-text-o"
+                                attrs="{'invisible': [('local_rfq_created', '=', False), ('state', '!=', 'approved')]}">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="rfq_count" widget="statinfo" string="  RFQ(s)"/>
+                                </span>
+                                
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="reference" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            
+                            <field name="requested_by"/>
+                            <field name="request_department"/>
+                            <field name="purchase_type"/>
+                            
+                        </group>
+                        <group>
+                            <field name="request_date"/>
+                            <field name="purpose"/>
+                        </group>
+                    </group>
+
+                    <field name="local_rfq_created" invisible="1"/>
+                    <field name="show_create_rfq_button" invisible="1"/>
+
+                    <notebook>
+                        <page string="Products">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="uom_id"/>
+                                    <field name="quantity"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_local_purchase_request_tree" model="ir.ui.view">
+        <field name="name">local.purchase.request.tree</field>
+        <field name="model">local.purchase.request</field>
+        <field name="arch" type="xml">
+            <tree string="Local Purchase Requests">
+                <field name="reference"/>
+                <field name="requested_by"/>
+                <field name="approved_by"/>
+                <field name="request_date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_local_purchase_request"
+              name="Local Purchase Requests"
+              parent="local_procurement_menu"
+              sequence="1"
+              action="action_local_purchase_request"/>
+</odoo>

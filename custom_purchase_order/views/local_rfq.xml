@@ -1,0 +1,158 @@
+<odoo>
+    <data>
+        <!-- Tree view for RFQs -->
+        <record id="view_local_create_rfq_tree" model="ir.ui.view">
+            <field name="name">local.create.rfq.tree</field>
+            <field name="model">local.create.rfq</field>
+            <field name="arch" type="xml">
+                <tree string="Local RFQ">
+                    <field name="reference"/>
+                    <field name="request_department"/>                   
+                    <field name="request_date"/>
+                    <field name="vendor_id"/>                    
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view for RFQs -->
+        <record id="view_local_create_rfq_form" model="ir.ui.view">
+            <field name="name">local.create.rfq.form</field>
+            <field name="model">local.create.rfq</field>
+            <field name="arch" type="xml">
+                <form string="Local RFQ">
+                    <header>
+                        <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_send" type="object" string="Approve " class="btn-success"
+                                attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                        
+                        <button type="action"
+                                name="%(custom_purchase_order.action_report_local_rfq)d"
+                                string="Print RFQ"
+                                class="btn-primary"
+                                icon="fa-print"
+                                attrs="{'invisible': [('state', 'in', ['sent', 'cancelled','confirmed'])]}"/>
+
+                        <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-primary"
+                                attrs="{'invisible': [('state', 'in', ['draft', 'cancelled'])]}"/>
+                        
+                        <button name="action_cancel" type="object" string="Cancel" class="btn-danger"
+                                attrs="{'invisible': [('state', '=', 'cancelled')]}"/>
+                        
+
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,sent,cancelled"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <!-- Create po Button (now using the computed field for visibility) -->
+                             <button class="oe_stat_button" name="action_create_po" type="object" icon="fa-file-text-o"
+                                    attrs="{'invisible': [('show_create_po_button', '=', True), ('state', '!=', 'sent')]}">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_value">Create PO</span>
+                                </div>
+                            </button>
+                            <button class="oe_stat_button" name="action_view_po" type="object" icon="fa-file-text-o"
+                                    attrs="{'invisible': [('local_po_created', '=', False), ('state', '!=', 'sent')]}">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="po_count" widget="statinfo" string=" PO(S)"/>
+                                    </span>
+                                    
+                                </div>
+                            </button>
+                        </div>
+
+
+                        <div class="oe_title">
+                            <h1>
+                                <field name="reference" readonly="1"/>
+                            </h1>
+                        </div>
+
+                        <div class="oe_title">
+                            <h4>
+                                <field name="purchase_request_id" readonly="1" options="{'no_open': False}"/>
+                            </h4>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="request_date"/>
+                                <field name="request_department"/>
+                                <field name="requested_by"/>
+                                <field name="approved_by"/>
+                            </group> 
+                            <group>
+                                <field name="remark"/>
+                                <field name="technical_remark"/>
+                                <field name="company_id"/>
+                            </group>
+                        </group>
+
+                        <field name="local_po_created" invisible="1"/>
+                        <field name="show_create_po_button" invisible="1"/>
+
+                        <notebook>
+                            <page string="Products">
+                                <field name="line_ids">
+                                    <!-- Main tree view with decoration attributes -->
+                                    <tree string="RFQ Lines"
+                                          decoration-success="winner == 'win'"
+                                          decoration-danger="winner == 'lost'"
+                                          editable="bottom">
+                                          
+                                        <field name="vendor_id"/>
+                                        <field name="product_id" domain="[('id', 'in', available_product_ids)]"/>
+                                        <field name="uom_id" readonly="1"/>
+                                        <field name="quantity"/>
+                                        <field name="price_unit"/>
+                                        <field name="price_total"/>
+                                        <field name="available_product_ids" invisible="1"/>
+                                        
+                                        <!-- Winner field, visible only after selection -->
+                                        <field name="winner" attrs="{'invisible': [('winner', '=', False)]}" />
+
+                                        <!-- Accept Button -->
+                                        <button name="action_accept" type="object" icon="fa-check" string="Accept"
+                                                attrs="{'invisible': [('winner', '!=', False)]}"/>
+
+                                        <!-- Refuse Button -->
+                                        <button name="action_refuse" type="object" icon="fa-times" string="Refuse"
+                                                attrs="{'invisible': [('winner', '!=', False)]}"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Summary">
+                                <group>
+                                    <field name="total_amount" readonly="1" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action for Local RFQ -->
+        <record id="action_local_create_rfq" model="ir.actions.act_window">
+            <field name="name">Local RFQ</field>
+            <field name="res_model">local.create.rfq</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_local_create_rfq_tree"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new RFQ.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu item for Local RFQ -->
+        <menuitem id="menu_local_create_rfq"
+                  name="Local Request for Quotation"
+                  parent="local_procurement_menu"
+                  sequence="2"
+                  action="action_local_create_rfq"/>
+    </data>
+</odoo>

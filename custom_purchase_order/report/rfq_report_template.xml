@@ -1,0 +1,93 @@
+<odoo>
+    <template id="report_template_name">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <main>
+                        <!-- Header -->
+                        <div class="row">
+                            <h1 style="text-align:center; color: purple;">Request for Quotation</h1>
+                        </div>
+                        <hr/>
+
+                        <!-- RFQ Date and Reference -->
+                        <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                            <div style="text-align: right;">
+                                <strong style="color: purple;">Date:</strong> <t t-esc="doc.request_date"/><br/>
+                                <strong style="color: purple;">Reference:</strong> <t t-esc="doc.reference" />
+                            </div>
+                        </div>
+                        <br/>
+                        
+                        <!-- Company Information -->
+                        <div style="margin-top: 20px;">
+                            <strong style="color: purple;">Company:</strong>
+                            <t t-esc="doc.company_id.name"/> <!-- Display company name -->
+                            <br/>
+                            <strong style="color: purple;">Address:</strong>
+                            <t t-esc="doc.company_id.street"/> <!-- Display company address -->
+                            <br/>
+                            <strong style="color: purple;">VAT:</strong>
+                            <t t-esc="doc.company_id.vat"/> <!-- Display company VAT -->
+                            <br/>
+                            <strong style="color: purple;">Phone:</strong>
+                            <t t-esc="doc.company_id.phone"/> <!-- Display company phone -->
+                            <br/>
+                            <strong style="color: purple;">Email:</strong>
+                            <t t-esc="doc.company_id.email"/> <!-- Display company email -->
+                        </div>
+                        <br/>
+                        <hr/>
+
+                        <!-- Vendor Information -->
+                        <div style="margin-top: 20px;">
+                            <strong style="color: purple;">Vendor:</strong>
+                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 10px;"></span> <!-- Space for vendor line -->
+                            <br/>
+                            <strong style="color: purple;">Address:</strong>
+                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 9px;"></span> <!-- Space for vendor address -->
+                            <br/>
+                            <strong style="color: purple;">TIN:</strong>
+                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 12px;"></span> <!-- Space for TIN -->
+                        </div>
+                        <br/>
+                        <hr/>
+
+                        <!-- Product Table -->
+                        <div style="margin-top: 20px;">
+                            <table class="table table-sm" style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid black;">
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Product</th>
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Quantity</th>
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Unit Price</th>
+                                        <th style="text-align: left; color: purple;">Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.line_ids" t-as="line">
+                                        <tr>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.product_id.display_name"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.quantity"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <input type="text" name="unit_price" style="width: 100%; border: none;"/>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="total_price" style="width: 100%; border: none;"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </main>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
