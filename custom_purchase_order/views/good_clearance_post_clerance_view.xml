@@ -1,0 +1,74 @@
+<odoo>
+    <record id="view_foreign_purchase_order_form_good_clearance" model="ir.ui.view"> 
+        <field name="name">foreign.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='shipment']" position="after">
+                <page string="Good Clearance" name="good_clearance">
+                    <group>
+                        <group string="Transport Information">
+                            <field name="mode_of_transport"/>
+                            <field name="good_arrival_final_destination"/>
+                            <field name="freight_payment_by_air"/>
+                            <field name="freight_payment_date"/>
+                            <field name="freight_settlement_advise_to_finance"/>
+                            <field name="container_deposit_amount"/>
+                        </group>
+                        <group string="Customs  Taxes">
+                            <field name="declaration_number"/>
+                            <field name="custom_duty_tax_amount"/>
+                            <field name="custom_duty_withholding_tax"/>
+                            <field name="custom_duty_tax_paid_date"/>
+                            <field name="custom_tax_acceptance"/>
+                            <field name="custom_duty_tax_additional_amount"/>
+                            <field name="custom_actual_tax_additional_amount"/>
+                        </group>
+                        <group string="FDA  Permits">
+                            <field name="release_permit_applied_to_fda"/>
+                            <field name="release_permit_received_from_fda"/>
+                        </group>
+                        <group string="Costs  Final Delivery">
+                            <field name="storage_cost"/>
+                            <field name="demurrage_cost"/>
+                            <field name="local_transport_cost"/>
+                            <field name="loading_unloading_cost"/>
+                            <field name="release_date_from_customs_delivery"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_foreign_purchase_order_form_Post_clearance" model="ir.ui.view"> 
+        <field name="name">foreign.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='good_clearance']" position="after">
+                <page string="Post Clearance" name="post_clearance">
+                    <group>
+                        <group string="Inventory">
+                            <field name="paking_list_shared_with_inventory"/>
+                            <field name="good_arrival_date"/>
+                            <field name="grn_reconcile_from_received_date"/>
+                            <field name="reconcile_disperancy"/>
+                            
+                        </group>
+                        <group string="Additional Info">
+                            <field name="grn_submitted_to_finance"/>
+                            <field name="stamped_declaration_received_date"/>
+                            <field name="delinquent_settlement_date"/>
+                            <field name="transistor_service_payment_amount"/>
+                            <field name="container_deposited_reimpursed_date"/>
+                            <field name="transistor_service_payment_done_date"/>
+                            
+                        </group>
+                        
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

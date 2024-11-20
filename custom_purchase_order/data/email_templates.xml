@@ -1,0 +1,79 @@
+<odoo>
+    <data>
+        <record id="foreign_rfq_email_template" model="mail.template">
+            <field name="name">Foreign RFQ Email</field>
+            <field name="model_id" ref="custom_purchase_order.model_foreign_create_rfq"/>
+            <field name="subject">Request for Quotation: ${object.foreign_reference}</field>
+            <field name="email_from">${object.company_id.email}</field>
+            <field name="email_to">${object.vendor_id.email}</field>
+            <field name="body_html" type="html">
+                <![CDATA[
+                    <p>Dear ${object.vendor_id.name},</p>
+                    <p>Please find attached the Request for Quotation (RFQ) <strong>${object.foreign_reference}</strong> from ${object.company_id.name}.</p>
+                ]]>
+            </field>
+        </record>
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <odoo>
+    <data>
+        <record id="foreign_rfq_email_template" model="mail.template">
+            <field name="name">Foreign RFQ Email</field>
+            <field name="model_id" ref="custom_purchase_order.model_foreign_create_rfq"/>
+            <field name="subject">Request for Quotation: ({object.foreign_reference})</field>
+            <field name="email_from">({object.company_id.email or user.email})</field>
+            <field name="email_to">({object.vendor_id.email})</field>
+            <field name="body_html" type="html">
+                <![CDATA[
+                    <p>Dear ({object.vendor_id.name}),</p>
+                    <p>Please find attached the Request for Quotation (RFQ) <strong>({object.foreign_reference})</strong> from ({object.company_id.name}).</p>
+                    <p>Here are the details:</p>
+                    <ul>
+                        <li>Request Date: ({object.request_date})</li>
+                        <li>Department: ({object.request_department.name})</li>
+                        <li>Requested By: ({object.requested_by.name})</li>
+                        <li>Total Amount: ({object.total_amount})</li>
+                    </ul>
+                    <table>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                        </tr>
+                        % for line in object.line_ids:
+                            <tr>
+                                <td>({line.product_id.name})</td>
+                                <td>({line.quantity})</td>
+                                <td>({line.price_unit})</td>
+                                <td>({line.price_total})</td>
+                            </tr>
+                        % endfor
+                    </table>
+                    <p>Best regards,</p>
+                    <p>({object.company_id.name})</p>
+                ]]>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo> -->

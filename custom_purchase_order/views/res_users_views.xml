@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+
+        <!-- Modify User Form to Add the Boolean Fields for Group Assignment -->
+        <record id="view_user_form_inherit" model="ir.ui.view">
+            <field name="name">res.users.form.inherit</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_simple_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='group']" position="inside">
+                    <field name="is_department_manager"/>
+                    <field name="is_verify_manager"/>
+                    <field name="is_finance_manager"/>
+                    <field name="is_pm_manager"/>
+                    <field name="is_ceo"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

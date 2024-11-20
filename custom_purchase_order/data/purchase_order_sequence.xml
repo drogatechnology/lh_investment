@@ -18,4 +18,13 @@
         <field name="number_next">1</field>
         
     </record>
+
+    <!-- Sequence for Direct Purchase Orders -->
+    <record id="direct_purchase_order_sequence" model="ir.sequence">
+        <field name="name">Direct Purchase Order</field>
+        <field name="code">direct.purchase.order.sequence</field>
+        <field name="prefix">PO-D</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+    </record>
 </odoo>

@@ -1,0 +1,29 @@
+<odoo>
+    <!-- Tree View for Port of Loading -->
+    <record id="view_port_of_loading_tree" model="ir.ui.view">
+        <field name="name">port.of.loading.tree</field>
+        <field name="model">purchase.port.loading</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="country"/>
+                <field name="port_type"/>
+                <field name="shipment_type"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action to Open Port of Loading -->
+    <record id="action_port_of_loading" model="ir.actions.act_window">
+        <field name="name">Port of Loading</field>
+        <field name="res_model">purchase.port.loading</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <!-- Add the Port of Loading menu item under Purchase Configuration -->
+    <menuitem id="menu_port_of_loading" 
+              parent="purchase.menu_purchase_config" 
+              action="action_port_of_loading" 
+              name="Port of Loading"/>
+</odoo>

@@ -1,0 +1,126 @@
+<odoo>
+    
+     <record id="view_purchase_order_lc_form" model="ir.ui.view">
+        <field name="name">purchase.order.lc.form</field>
+        <field name="model">purchase.order.lc</field>
+        <field name="arch" type="xml">
+            <form string="LC Details">
+                <header>                   
+
+                    
+                    <button name="action_activate" type="object" string="Activate" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+
+                    
+                    <button name="action_expire" type="object" string="Expire" class="btn-danger"
+                            attrs="{'invisible': [('state', '!=', 'active')]}"/>
+
+                    
+                    <button name="action_close" type="object" string="Close" class="btn-warning"
+                            attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
+
+                    
+                    <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
+                            attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,expired,closed"/>
+                </header>
+                <group>
+                    <group>
+                        <field name="existing_purchase_order_reference" readonly="1"/>
+                        <field name="lc_number"/>
+                        <field name="issue_date"/>
+                        <field name="expire_date"/>
+                        <field name="last_day_shipment"/>
+
+                    </group>
+                    <group>
+                        <field name="bank"/>
+                        <field name="branch"/>
+                        <field name="request_approved_date"/>
+                        <field name="total_amount_usd"/>
+                        <field name="exchange_rate"/>
+                        <field name="total_amount_etb"/>
+                        
+                    </group>
+                    <group string="Approved Dates">
+                        <field name="draft_lc_approved"/>
+                        <field name="draft_lc_approved_by_supplier"/>
+
+                        
+                    </group>
+                     <group string="Approved Dates">
+                        <field name="lc_send_date_to_supplier"/>
+                        <field name="lc_received_date_from_bank"/>
+
+                        
+                    </group>
+                    
+                    
+                    
+                </group>
+                <!-- <footer>
+                    <button string="Save" type="object" name="action_save" class="btn-primary"/>
+                    <button string="Discard" type="object" name="action_discard" class="btn-secondary" special="cancel"/>
+                </footer> -->
+            </form>
+        </field>
+    </record>
+    
+    
+    <record id="view_foreign_purchase_order_form_lc" model="ir.ui.view">
+        <field name="name">purchase.order.form.lc</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='ordering']/notebook" position="inside">
+                <page string="LC" name="lc_page">
+                    <field name="lc_order_ids" widget="one2many_list" mode="tree,form">
+                        <tree>
+                            <field name="lc_number"/>
+                            <field name="bank"/>
+                            <field name="branch"/>
+                            <field name="issue_date"/>
+                            <field name="state"/>
+                        </tree>
+                        <!-- <form string="LC Details">
+                            <header>
+                                
+                                <button name="action_activate" type="object" string="Activate" class="btn-secondary"
+                                        attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+
+                                
+                                <button name="action_expire" type="object" string="Expire" class="btn-danger"
+                                        attrs="{'invisible': [('state', '!=', 'active')]}"/>
+
+                                
+                                <button name="action_close" type="object" string="Close" class="btn-warning"
+                                        attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
+
+                               
+                                <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
+                                        attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
+
+                                <field name="state" widget="statusbar" statusbar_visible="draft,active,expired,closed"/>
+                            </header>
+                            <group>
+                                <field name="existing_purchase_order_id" readonly="1"/>
+                                <field name="lc_number"/>
+                                <field name="bank"/>
+                                <field name="branch"/>
+                                <field name="issue_date"/>
+                            </group>
+                            <footer>
+                                <button string="Save" type="object" name="action_save" class="btn-primary"/>
+                                <button string="Discard" type="object" name="action_discard" class="btn-secondary" special="cancel"/>
+                            </footer>
+                        </form> -->
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    
+   
+</odoo>

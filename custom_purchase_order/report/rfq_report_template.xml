@@ -14,7 +14,7 @@
                         <div style="margin-top: 20px; display: flex; justify-content: space-between;">
                             <div style="text-align: right;">
                                 <strong style="color: purple;">Date:</strong> <t t-esc="doc.request_date"/><br/>
-                                <strong style="color: purple;">Reference:</strong> <t t-esc="doc.reference" />
+                                <strong style="color: purple;">Reference:</strong> <t t-esc="doc.reference"/>
                             </div>
                         </div>
                         <br/>
@@ -22,19 +22,19 @@
                         <!-- Company Information -->
                         <div style="margin-top: 20px;">
                             <strong style="color: purple;">Company:</strong>
-                            <t t-esc="doc.company_id.name"/> <!-- Display company name -->
+                            <t t-esc="doc.company_id.name"/> 
                             <br/>
                             <strong style="color: purple;">Address:</strong>
-                            <t t-esc="doc.company_id.street"/> <!-- Display company address -->
+                            <t t-esc="doc.company_id.street"/> 
                             <br/>
                             <strong style="color: purple;">VAT:</strong>
-                            <t t-esc="doc.company_id.vat"/> <!-- Display company VAT -->
+                            <t t-esc="doc.company_id.vat"/> 
                             <br/>
                             <strong style="color: purple;">Phone:</strong>
-                            <t t-esc="doc.company_id.phone"/> <!-- Display company phone -->
+                            <t t-esc="doc.company_id.phone"/> 
                             <br/>
                             <strong style="color: purple;">Email:</strong>
-                            <t t-esc="doc.company_id.email"/> <!-- Display company email -->
+                            <t t-esc="doc.company_id.email"/>
                         </div>
                         <br/>
                         <hr/>
@@ -42,13 +42,13 @@
                         <!-- Vendor Information -->
                         <div style="margin-top: 20px;">
                             <strong style="color: purple;">Vendor:</strong>
-                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 10px;"></span> <!-- Space for vendor line -->
+                            <t t-esc="doc.vendor_id.name" />
                             <br/>
                             <strong style="color: purple;">Address:</strong>
-                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 9px;"></span> <!-- Space for vendor address -->
+                            <t t-esc="doc.vendor_id.street" />
                             <br/>
                             <strong style="color: purple;">TIN:</strong>
-                            <span style="border-bottom: 1px solid black; width: 400px; display: inline-block; margin-left: 12px;"></span> <!-- Space for TIN -->
+                            <t t-esc="doc.vendor_id.tin" />
                         </div>
                         <br/>
                         <hr/>
@@ -74,10 +74,10 @@
                                                 <t t-esc="line.quantity"/>
                                             </td>
                                             <td style="border-right: 1px solid black;">
-                                                <input type="text" name="unit_price" style="width: 100%; border: none;"/>
+                                                <t t-esc="line.unit_price"/> <!-- Assuming unit_price is a field in line -->
                                             </td>
                                             <td>
-                                                <input type="text" name="total_price" style="width: 100%; border: none;"/>
+                                                <t t-esc="line.quantity * line.unit_price"/> <!-- Calculate total price -->
                                             </td>
                                         </tr>
                                     </t>

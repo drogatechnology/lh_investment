@@ -14,8 +14,7 @@
                 </tree>
             </field>
         </record>
-
-        <!-- Form view for RFQs -->
+        
         <record id="view_local_create_rfq_form" model="ir.ui.view">
             <field name="name">local.create.rfq.form</field>
             <field name="model">local.create.rfq</field>
@@ -23,47 +22,40 @@
                 <form string="Local RFQ">
                     <header>
                         <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
-                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                        <button name="action_send" type="object" string="Approve " class="btn-success"
-                                attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
-                        
-                        <button type="action"
-                                name="%(custom_purchase_order.action_report_local_rfq)d"
-                                string="Print RFQ"
-                                class="btn-primary"
-                                icon="fa-print"
-                                attrs="{'invisible': [('state', 'in', ['sent', 'cancelled','confirmed'])]}"/>
+                                groups="custom_purchase_order.group_local_purchase_request_user, custom_purchase_order.group_local_purchase_request_ceo"
+                                states="draft"/>
+                        <button name="action_send" type="object" string="Committe Approve" class="btn-success"
+                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"
+                                states="confirmed"/>
 
-                        <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-primary"
-                                attrs="{'invisible': [('state', 'in', ['draft', 'cancelled'])]}"/>
-                        
+                        <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-secondary"
+                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"/>
+
                         <button name="action_cancel" type="object" string="Cancel" class="btn-danger"
-                                attrs="{'invisible': [('state', '=', 'cancelled')]}"/>
-                        
-
+                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"/>
 
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,sent,cancelled"/>
                     </header>
+
                     <sheet>
                         <div class="oe_button_box" name="button_box">
-                            <!-- Create po Button (now using the computed field for visibility) -->
-                             <button class="oe_stat_button" name="action_create_po" type="object" icon="fa-file-text-o"
-                                    attrs="{'invisible': [('show_create_po_button', '=', True), ('state', '!=', 'sent')]}">
+                            <button class="oe_stat_button" name="action_create_po" type="object" icon="fa-file-text-o"
+                                    attrs="{'invisible': [('state', '!=', 'sent')]}">
                                 <div class="o_stat_info">
                                     <span class="o_stat_value">Create PO</span>
                                 </div>
                             </button>
+
                             <button class="oe_stat_button" name="action_view_po" type="object" icon="fa-file-text-o"
-                                    attrs="{'invisible': [('local_po_created', '=', False), ('state', '!=', 'sent')]}">
+                                    attrs="{'invisible': [('state', '!=', 'sent')]}">
                                 <div class="o_stat_info">
                                     <span class="o_stat_value">
-                                        <field name="po_count" widget="statinfo" string=" PO(S)"/>
+                                        <field name="po_count" widget="statinfo" string="PO(S)"/>
                                     </span>
-                                    
                                 </div>
                             </button>
-                        </div>
 
+                        </div>
 
                         <div class="oe_title">
                             <h1>
@@ -79,58 +71,88 @@
                         <group>
                             <group>
                                 <field name="request_date"/>
-                                <field name="request_department"/>
                                 <field name="requested_by"/>
+                                <field name="request_department"/>                                
                                 <field name="approved_by"/>
                             </group> 
                             <group>
                                 <field name="remark"/>
                                 <field name="technical_remark"/>
                                 <field name="company_id"/>
+                                <field name="purchase_type" readonly="1"/>
+
+                            </group>
+                            <group >                                
+                            </group>
+                            <group >
+
+                                <div class="oe_button_box" style="display: flex; gap: 30px; justify-content: flex-end;">
+                                       <button name="action_compute_winner" type="object" 
+                                                string="Pick Winner for Goods" 
+                                                class="btn btn-primary" 
+                                                groups="custom_purchase_order.group_local_purchase_request_pm_manager"
+                                                style="margin-right: 10px;" 
+                                                attrs="{'invisible': [('state', '!=', 'confirmed')]}">
+                                            <i class="fa fa-calculator" aria-hidden="true"></i> Pick Winner for Goods
+                                        </button>
+
+                                        <button name="action_pick_winner" type="object" 
+                                                string="Pick Winner for Service" 
+                                                class="btn btn-primary" 
+                                                groups="custom_purchase_order.group_local_purchase_request_pm_manager"
+                                                style="margin-right: 10px;" 
+                                                attrs="{'invisible': [('state', '!=', 'confirmed')]}">
+                                            <i class="fa fa-calculator" aria-hidden="true"></i> Pick Winner for Service
+                                        </button>
+
+                                       
+                                       
+                                       
+                                       
+                                       
+                                        
+                                    </div>
+                                
                             </group>
                         </group>
 
                         <field name="local_po_created" invisible="1"/>
-                        <field name="show_create_po_button" invisible="1"/>
+                        <field name="show_create_po_button" invisible="1"/>  
+                        
 
                         <notebook>
                             <page string="Products">
                                 <field name="line_ids">
-                                    <!-- Main tree view with decoration attributes -->
                                     <tree string="RFQ Lines"
-                                          decoration-success="winner == 'win'"
-                                          decoration-danger="winner == 'lost'"
-                                          editable="bottom">
-                                          
-                                        <field name="vendor_id"/>
-                                        <field name="product_id" domain="[('id', 'in', available_product_ids)]"/>
+                                        decoration-success="winner == 'win'"
+                                        decoration-danger="winner == 'lost'"
+                                        editable="bottom">
+                                        <field name="vendor_id" />
+                                        <field name="product_id" />
                                         <field name="uom_id" readonly="1"/>
                                         <field name="quantity"/>
-                                        <field name="price_unit"/>
+                                        <field name="price_unit" />
                                         <field name="price_total"/>
+                                        <field name="technical_by_percent" widget="percentage"/>
+                                        <field name="financial" widget="percentage"/>
                                         <field name="available_product_ids" invisible="1"/>
-                                        
-                                        <!-- Winner field, visible only after selection -->
-                                        <field name="winner" attrs="{'invisible': [('winner', '=', False)]}" />
-
-                                        <!-- Accept Button -->
+                                        <field name="winner" attrs="{'invisible': [('winner', '=', False)]}" /> 
                                         <button name="action_accept" type="object" icon="fa-check" string="Accept"
                                                 attrs="{'invisible': [('winner', '!=', False)]}"/>
-
-                                        <!-- Refuse Button -->
                                         <button name="action_refuse" type="object" icon="fa-times" string="Refuse"
                                                 attrs="{'invisible': [('winner', '!=', False)]}"/>
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Summary">
-                                <group>
-                                    <field name="total_amount" readonly="1" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
-                                </group>
-                            </page>
+                            
                         </notebook>
+
                     </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
                 </form>
             </field>
         </record>

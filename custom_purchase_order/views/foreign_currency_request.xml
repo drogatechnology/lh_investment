@@ -1,0 +1,129 @@
+<odoo>
+    <!-- Form View for Foreign Currency Request -->
+    
+    <record id="view_foreign_currency_request_tree" model="ir.ui.view">
+        <field name="name">foreign.currency.request.tree</field>
+        <field name="model">foreign.currency.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="foreign_currency_request_reference"/>
+                <field name="requested_by"/>
+                <field name="request_department"/>
+                <field name="request_date"/>
+                <field name="currency_id"/>
+                <field name="price_amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="view_foreign_currency_request_form" model="ir.ui.view">
+        <field name="name">foreign.currency.request.form</field>
+        <field name="model">foreign.currency.request</field>
+        <field name="arch" type="xml">
+            <form string="Foreign Currency Request">
+                <!-- Header section for action buttons -->
+                <header>
+
+
+                     <button name="action_submit" type="object" string="Submit" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+
+                    <button name="action_queue" type="object" string="Mark as Done" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'queued')]}"/>
+
+                    <!-- Approve button, visible in 'submitted' state -->
+                    <button name="action_approve" type="object" string="Approve" class="btn-success"
+                            attrs="{'invisible': [('state', '!=', 'queued')]}"/>
+
+                    <!-- Done button, visible in 'approved' state -->
+                    
+
+                    <!-- Cancel button, visible in 'submitted' or 'approved' state -->
+                    <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
+                            attrs="{'invisible': [('state', 'not in', ('submitted', 'approved'))]}"/>
+
+                    <!-- Status bar including all states -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,queued,approved,cancelled"/>
+
+
+                    
+                    <!-- <button name="action_approve" type="object" string="Approve" class="oe_highlight"/>
+                    <button name="action_cancel" type="object" string="Cancel"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft"/>
+                    <button name="action_submit" type="object" string="Submit"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,queued,on_progress,approved,cancelled" string="Status"/> -->
+                </header>
+
+                <!-- Main content of the form -->
+                <sheet>
+                    <group>
+                        <group>
+
+                            <field name="foreign_currency_request_reference" string="Reference" readonly="1"/>
+                            <field name="foreign_rfq_id" string="RFQ reference"/>
+                            <field name="requested_by" string="Requested By"/>
+                            <field name="request_department" string="Department"/>
+                            <field name="request_date" string="Request Date"/>
+
+                            
+                        </group>
+                        <group name="name" string="string">
+                            <field name="proforma_invoice" string="Proforma Invoice"/>
+                            <field name="currency_id" string="Currency"/>
+                            <field name="purpose" string="Purpose"/>
+                            <field name="nbe_number" string="NBE Number"/>
+                            
+                        </group>
+                        <group string="Supplier">
+                            <field name="vendor_id" string="Supplier"/>
+                            <field name="payment_due_date" string="Payment Due Date"/>
+
+                            
+                        </group>
+                        <group string="Amount">
+                            <field name="price_amount" string="Total Amount USD"/>
+                            <field name="exchange_rate"/>
+                            <field name="total_amount_etb" string="Total Amount ETB" readonly="1"/>
+                            <field name="amount_in_word" string="Amount In Words" readonly="1"/>
+                            
+
+                            
+                        </group>
+                        <group  string="Bank">
+                            <field name="approved_date" string="Approved Date"/>
+                            <field name="bank" string="Budget Position"/>
+                            <field name="branch" string="Budget Account"/>
+                            
+                        </group>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for opening the form view -->
+    <record id="action_foreign_currency_request" model="ir.actions.act_window">
+        <field name="name">Foreign Currency Request</field>
+        <field name="res_model">foreign.currency.request</field>
+        <field name="view_mode">form,tree</field>
+        <field name="view_id" ref="view_foreign_currency_request_tree"/>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menu item to access the form view -->
+    <menuitem id="menu_foreign_currency_request" 
+              name="Foreign Currency Request" 
+              parent="foreign_procurement_menu" 
+              sequence = "6"
+              action="action_foreign_currency_request"/>
+</odoo>

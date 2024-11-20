@@ -1,0 +1,37 @@
+<odoo>
+    <data>
+
+        <!-- Modify Configuration Settings to Add the Default Boolean Fields -->
+        <record id="view_config_settings_inherit" model="ir.ui.view">
+            <field name="name">res.config.settings.inherit</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='default_settings']" position="inside">
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="default_is_department_manager"/>
+                            <field name="default_is_department_manager"/>
+                        </div>
+                        <div class="col-6">
+                            <label for="default_is_verify_manager"/>
+                            <field name="default_is_verify_manager"/>
+                        </div>
+                        <div class="col-6">
+                            <label for="default_is_finance_manager"/>
+                            <field name="default_is_finance_manager"/>
+                        </div>
+                        <div class="col-6">
+                            <label for="default_is_pm_manager"/>
+                            <field name="default_is_pm_manager"/>
+                        </div>
+                        <div class="col-6">
+                            <label for="default_is_ceo"/>
+                            <field name="default_is_ceo"/>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

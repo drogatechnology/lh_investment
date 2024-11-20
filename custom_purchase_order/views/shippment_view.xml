@@ -1,0 +1,39 @@
+<odoo>
+    <record id="view_foreign_purchase_order_form_shipment" model="ir.ui.view">
+        <field name="name">foreign.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='ordering']" position="after">
+                <page string="Shipment" name="shipment">
+                    <group>
+                        <group string="Shipment Document">
+                            <field name="shipment_percent"/>
+                            <field name="is_shipment_partial"/>
+                            <field name="shipment_date"/>
+                            <field name="production_completion_date"/>
+                            <field name="shipment_scan_copy_received_date"/>
+                            <field name="shipment_original_copy_received_date"/>
+                            <field name="shipment_original_send_from_supplier"/>
+
+                            
+                        </group>
+                        
+                        <group string="Shipment Document">
+
+                            <field name="shipment_original_send_from_supplier_courier"/>
+                            <field name="document_tracking_number"/>
+                            <field name="shipment_original_copy_received_by_applicant_bank"/>
+                            <field name="disrepancy"/>
+                            <field name="exchange_rate_lc_settlement"/>
+                            <field name="shipment_lc_amount"/>
+                            <field name="shipmnet_doc_handed_to_finance"/>
+                            <field name="supplier_payment_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

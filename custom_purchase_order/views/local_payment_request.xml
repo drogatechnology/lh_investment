@@ -1,0 +1,162 @@
+<odoo>
+    <record id="view_payment_confirmation_wizard" model="ir.ui.view">
+        <field name="name">payment.confirmation.wizard.form</field>
+        <field name="model">payment.confirmation.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div>
+                    <h3>Are you sure you want to approve this request? </h3>
+                </div>
+                <footer>
+                    <button string="OK" type="object" name="action_confirm_payment" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_open_payment_confirmation_wizard" model="ir.actions.act_window">
+        <field name="name">Confirm Payment</field>
+        <field name="res_model">payment.confirmation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_local_payment_request_form" model="ir.ui.view">
+        <field name="name">local.payment.request.form</field>
+        <field name="model">local.payment.request</field>
+        <field name="arch" type="xml">
+            <form string="Local Payment Request">
+                <header>
+                    <button name="action_submit" type="object" string="Submit" class="btn-primary"
+                            groups="custom_purchase_order.group_payment_request_user"
+                            states="draft"/>
+
+                    <!-- Verify Button: Visible to PM Manager and CEO in the 'submitted' state -->
+                    <button name="action_approve" type="object" string="PM Approve" class="btn-primary"
+                            groups="custom_purchase_order.group_payment_request_pm_manager"
+                           
+                            states="submitted"/>
+
+                    <button name="action_done" type="object" string="CEO Approved" class="btn-primary"
+                            groups="custom_purchase_order.group_payment_request_ceo"
+                            
+                            states="approved"/>
+
+                    <!-- Budget Approved Button: Visible to Finance Manager and CEO in the 'approved' state -->
+                    <button name="action_budget_approve" type="object" string="Budget Approved" class="btn-primary"
+                            groups="custom_purchase_order.group_payment_request_finance_manager"
+                            states="done"/>
+
+                    <!-- PM Approve Button: Visible to PM Manager and CEO in the 'budget' state -->
+                    <button name="action_paid" type="object" string="Request Payment" class="btn-primary"
+                            groups="custom_purchase_order.group_payment_request_pm_manager"
+                            states="budget"/>
+
+                    <!-- CEO Approved Button: Visible only to CEO in the 'pmapproved' state -->
+                    
+
+                    <!-- Cancel Button: Visible to PM Manager and CEO, available in any state -->
+                    <button name="action_cancel" type="object" string="Cancel" class="btn-danger"
+                            groups="custom_purchase_order.group_payment_request_pm_manager, custom_purchase_order.group_payment_request_ceo"/>
+
+                    <!-- Reset to Draft Button: Visible to PM Manager, Finance Manager, and CEO, available in any state -->
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-secondary"
+                            groups="custom_purchase_order.group_payment_request_pm_manager, custom_purchase_order.group_payment_request_finance_manager, custom_purchase_order.group_payment_request_ceo"/>
+
+
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="payment_reference" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="purchase_order_id" readonly="1"/> 
+                            <field name="requested_by"/>
+                            <field name="request_department"/>
+                            <field name="cost_center"/>
+                            <field name="request_date"/>
+                        </group>
+                        <group>
+                            <field name="purpose"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group string="Pay To">
+                            <field name="vendor_id"/>
+                            <field name="payment_due_date"/>
+                        </group>
+                        <group string="Amount">
+                            <field name="payment_type"/>
+                            <field name="total_amount"/>
+                            <field name="exchange_rate" attrs="{'invisible': [('show_exchange_rate', '=', False)]}"/>                            
+                            <field name="total_amount_etb"/>
+                            <field name="amount_in_word"/>
+                        </group>
+                        <group string="Budget Category">
+                            <field name="budgetary_position"/>
+                            <field name="budget_account"/>
+                            <field name="budget_rem_balance"/>
+                            <field name="show_exchange_rate" invisible="1"/>
+                            <field name="button_clicked" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_local_payment_request_tree" model="ir.ui.view">
+        <field name="name">local.payment.request.tree</field>
+        <field name="model">local.payment.request</field>
+        <field name="arch" type="xml">
+            <tree string="Local Payment Requests">
+                <field name="payment_reference"/>
+                <field name="vendor_id"/>
+                <field name="total_amount"/>
+                <field name="request_date"/>
+                <field name="state"/>
+                  <!-- Include payment_status field for visibility -->
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_account_payment_form_inherit" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="payment_request_reference" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_local_payment_request" model="ir.actions.act_window">
+        <field name="name">Payment Requests</field>
+        <field name="res_model">local.payment.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_local_payment_request_tree"/>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_local_payment_request"
+              name="Payment Request"
+              parent="foreign_procurement_menu"
+              sequence="5"            
+              action="action_local_payment_request"/>
+
+    <menuitem id="menu_payment_request_finance"
+              name="Payment Requests"
+              parent="menu_purchase_request_finance_root"
+              sequence="3"            
+              action="action_local_payment_request"/>
+</odoo>

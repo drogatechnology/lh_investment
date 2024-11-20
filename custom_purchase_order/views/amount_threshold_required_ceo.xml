@@ -1,0 +1,43 @@
+<odoo>
+
+    <record id="view_minimum_amount_rate_tree" model="ir.ui.view">
+        <field name="name">payment_approval.threshold.tree</field>
+        <field name="model">payment_approval.threshold</field>
+        <field name="arch" type="xml">
+            <!-- Add 'editable="bottom"' to make the tree view editable -->
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="amount_limit"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_minimum_amount_rate_form" model="ir.ui.view">
+        <field name="name">payment_approval.threshold.form</field>
+        <field name="model">payment_approval.threshold</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="amount_limit"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_minimum_payment_rate" model="ir.actions.act_window">
+        <field name="name">Minimum Amount</field>
+        <field name="res_model">payment_approval.threshold</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_minimum_amount_rate_tree"/>
+    </record>
+
+    <menuitem id="menu_minimum_amount_rate_root"
+              name="Minimum Amount"
+              parent="purchase.menu_purchase_config"
+              sequence="11"
+              action="action_minimum_payment_rate"/>
+</odoo>
+

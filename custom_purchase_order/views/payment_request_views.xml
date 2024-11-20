@@ -1,0 +1,56 @@
+<odoo>
+    <!-- Form View for Foreign Currency Request -->
+    <record id="view_foreign_currency_request_form" model="ir.ui.view">
+        <field name="name">foreign.currency.request.form</field>
+        <field name="model">foreign.currency.request</field>
+        <field name="arch" type="xml">
+            <form string="Foreign Currency Request">
+                <!-- Header section for action buttons -->
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="oe_highlight"/>
+                    <button name="action_cancel" type="object" string="Cancel"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft"/>
+                    <button name="action_submit" type="object" string="Submit"/>
+                </header>
+
+                <!-- Main content of the form -->
+                <sheet>
+                    <group>
+                        <field name="foreign_currency_request_reference" string="Reference" readonly="1"/>
+                        <field name="foreign_rfq_id" string="Payment Request"/>
+                        <field name="name" string="Payment Request"/>
+                        <field name="proforma_invoice" string="Cost Center"/>
+                        <field name="requested_by" string="Requested By"/>
+                        <field name="request_department" string="Department"/>
+                        <field name="request_date" string="Request Date"/>
+                        <field name="currency_id" string="Currency"/>
+                        <field name="purpose" string="Purpose"/>
+                        <field name="nbe_number" string="NBE Number"/>
+                        <field name="supplier_id" string="Supplier"/>
+                        <field name="payment_due_date" string="Payment Due Date"/>
+                        <field name="total_amount" string="Total Amount USD"/>
+                        <field name="exchange_rate" string="Exchange Rate"/>
+                        <field name="total_amount_etb" string="Total Amount ETB" readonly="1"/>
+                        <field name="amount_in_word" string="Amount In Words" readonly="1"/>
+                        <field name="approved_date" string="Approved Date"/>
+                        <field name="bank" string="Budget Position"/>
+                        <field name="branch" string="Budget Account"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,queued,on_progress,approved,cancelled" string="Status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for opening the form view -->
+    <record id="action_foreign_currency_request" model="ir.actions.act_window">
+        <field name="name">Foreign Currency Request</field>
+        <field name="res_model">foreign.currency.request</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_foreign_currency_request_form"/>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Menu item to access the form view -->
+    <menuitem id="menu_foreign_currency_request" name="Foreign Currency Request" parent="purchase.menu_purchase_root" action="action_foreign_currency_request"/>
+</odoo>

@@ -1,21 +1,209 @@
 <odoo>
-
     <!-- Actions for Local Purchase Orders -->
-    <record id="action_local_purchase_order" model="ir.actions.act_window">
+    <record id="view_foreign_purchase_order_form" model="ir.ui.view">
+        <field name="name">foreign.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+              <xpath expr="//page[@name='purchase_delivery_invoice']" position="after">
+                <page string="Ordering" name="ordering">
+                    
+
+                    
+                    <notebook>
+                        <page string="Import Permit and Insurance" name="import_permit_insurance">
+                            <group>
+                                <group string="INSURANCE DETAIL"> 
+                                    <field name="insurance_policy_number" />
+                                    <field name="insurance_company" />
+                                    <field name="insurance_date" />
+                                    <field name="insurance_premium_cost" />
+                                
+                                </group>
+                                <group string="Import Permit Detail">
+                                    <field name="import_permit_number" />
+                                    <field name="import_permit_date" />
+                                    <field name="import_permit_approved" />
+                                    <field name="lpco_number" />                                    
+                                    <field name="margin" />
+                                    <field name="deposit_amount" />
+                                    <field name="deposit_date" />
+                                    <field name="bank_service_charge" />
+
+                                    
+                                </group>
+                                
+                                
+                            </group>
+                        </page>
+
+                        
+
+                        
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+
+    
+
+
+
+
+
+
+    <record id="view_local_purchase_order_form" model="ir.ui.view">
+        <field name="name">local.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='purchase_delivery_invoice']" position="after">
+                <!-- No additional pages for direct purchase orders -->
+            </xpath>
+            
+        </field>
+    </record>
+
+    <record id="view_direct_purchase_order_form" model="ir.ui.view">
+        <field name="name">direct.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='purchase_delivery_invoice']" position="after">
+                <!-- No additional pages for direct purchase orders -->
+            </xpath>
+        </field>
+    </record>
+
+        <record id="action_local_purchase_order" model="ir.actions.act_window">
         <field name="name">Local Purchase Orders</field>
         <field name="res_model">purchase.order</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('purchase_type', '=', 'local')]</field>
-        <field name="context">{'purchase_type': 'local'}</field> <!-- Pass context -->
+        <field name="context">{'purchase_type': 'local', 'form_view_id': 'custom_purchase_order.view_local_purchase_order_form'}</field>
     </record>
 
-    <!-- Actions for Foreign Purchase Orders -->
     <record id="action_foreign_purchase_order" model="ir.actions.act_window">
         <field name="name">Foreign Purchase Orders</field>
         <field name="res_model">purchase.order</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('purchase_type', '=', 'foreign')]</field>
-        <field name="context">{'purchase_type': 'foreign'}</field> <!-- Pass context -->
+        <field name="context">{'purchase_type': 'foreign', 'form_view_id': 'custom_purchase_order.view_foreign_purchase_order_form'}</field>
+    </record>
+
+    <record id="action_direct_purchase_order" model="ir.actions.act_window">
+        <field name="name">Direct Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('purchase_type', '=', 'direct')]</field>
+        <field name="context">{'purchase_type': 'direct', 'form_view_id': 'custom_purchase_order.view_direct_purchase_order_form'}</field>
+    </record>
+
+    <record id="view_purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.custom.button</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//div[@name='button_box']/button[@name='action_view_picking']" position="before">
+                
+                <button name="action_view_create_payment"
+                        type="object"
+                        class="oe_stat_button"
+                        string="View Payment Requests (%d)"
+                        attrs="{'invisible': [('state', '!=', 'purchase')]}"
+                        icon="fa-money">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="custom_count" widget="statinfo" />
+                        </span>
+                    </div>
+                </button>
+
+                <button name="custom_create_function"
+                        type="object"
+                        class="oe_stat_button"
+                        string="Payment Request"
+                        icon="fa-money"
+                        attrs="{'invisible': [('state', '!=', 'purchase')]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Payment Request</span>
+                    </div>
+            </button>
+
+            </xpath>
+        </field>
+    </record>
+
+
+
+    <record id="local_procurement_menu" model="ir.ui.menu">
+        <field name="name">Local Procurement</field>
+        <field name="parent_id" ref="purchase.menu_purchase_root"/>
+        <field name="sequence" eval="10"/>
+    </record>
+
+    <record id="foreign_procurement_menu" model="ir.ui.menu">
+        <field name="name">Foreign Procurement</field>
+        <field name="parent_id" ref="purchase.menu_purchase_root"/>
+        <field name="sequence" eval="20"/>
+    </record>
+
+    <record id="direct_purchase_order_menu" model="ir.ui.menu">
+        <field name="name">Direct Purchase Orders</field>
+        <field name="parent_id" ref="local_procurement_menu"/>
+        <field name="action" ref="action_direct_purchase_order"/>
+    </record>
+
+    <record id="local_purchase_order_menu" model="ir.ui.menu">
+        <field name="name">Local Purchase Orders</field>
+        <field name="parent_id" ref="local_procurement_menu"/>
+        <field name="action" ref="action_local_purchase_order"/>
+    </record>
+
+    <record id="foreign_purchase_order_menu" model="ir.ui.menu">
+        <field name="name">Foreign Purchase Orders</field>
+        <field name="parent_id" ref="foreign_procurement_menu"/>
+        <field name="action" ref="action_foreign_purchase_order"/>
+    </record>
+</odoo>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <odoo>
+
+    Actions for Local Purchase Orders
+    <record id="action_local_purchase_order" model="ir.actions.act_window">
+        <field name="name">Local Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('purchase_type', '=', 'local')]</field>
+        <field name="context">{'purchase_type': 'local'}</field> 
+    </record>
+
+    Actions for Foreign Purchase Orders
+    <record id="action_foreign_purchase_order" model="ir.actions.act_window">
+        <field name="name">Foreign Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('purchase_type', '=', 'foreign')]</field>
+        <field name="context">{'purchase_type': 'foreign'}</field> 
     </record>
 
     <record id="view_purchase_order_form" model="ir.ui.view">
@@ -42,31 +230,31 @@
         </field>
     </record>
 
-    <!-- Parent Menu for Local Procurement -->
+    Parent Menu for Local Procurement
     <record id="local_procurement_menu" model="ir.ui.menu">
         <field name="name">Local Procurement</field>
         <field name="parent_id" ref="purchase.menu_purchase_root"/>
         <field name="sequence" eval="10"/>
     </record>
 
-    <!-- Foreign Procurement Menu -->
+    Foreign Procurement Menu
     <record id="foreign_procurement_menu" model="ir.ui.menu">
         <field name="name">Foreign Procurement</field>
         <field name="parent_id" ref="purchase.menu_purchase_root"/>
         <field name="sequence" eval="20"/>
     </record>
 
-    <!-- Menu for Local Purchase Orders -->
+    Menu for Local Purchase Orders
     <record id="local_purchase_order_menu" model="ir.ui.menu">
         <field name="name">Local Purchase Order</field>
         <field name="parent_id" ref="local_procurement_menu"/>
         <field name="action" ref="action_local_purchase_order"/>
     </record>
 
-    <!-- Menu for Foreign Purchase Orders -->
+    Menu for Foreign Purchase Orders
     <record id="foreign_purchase_order_menu" model="ir.ui.menu">
         <field name="name">Foreign Purchase Order</field>
         <field name="parent_id" ref="foreign_procurement_menu"/>
         <field name="action" ref="action_foreign_purchase_order"/>
     </record>
-</odoo>
+</odoo> -->
