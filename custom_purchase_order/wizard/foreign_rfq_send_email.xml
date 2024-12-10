@@ -1,0 +1,40 @@
+<odoo>
+    <data>
+        <!-- Wizard Form View -->
+        <record id="view_foreign_rfq_email_wizard_form" model="ir.ui.view">
+            <field name="name">foreign.rfq.email.wizard.form</field>
+            <field name="model">foreign.rfq.email.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Send RFQ Email">
+                    <sheet>
+                        <group>
+                            <field name="vendor_email"/>
+                            <field name="message"/>
+                        </group>
+
+                        <!-- Attachment Display -->
+                        <group>
+                            <label for="pdf_attachment" string="Attachment" />
+                            <field name="pdf_attachment" filename="attachment_name" widget="binary" readonly="1"/>
+                        </group>
+
+                        <footer>
+                            <button name="send_email" type="object" string="Send" class="btn-primary"/>
+                            <button name="cancel" type="object" string="Cancel" class="btn-secondary"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Action for the Wizard -->
+        <record id="action_foreign_rfq_email_wizard" model="ir.actions.act_window">
+            <field name="name">Send RFQ Email</field>
+            <field name="res_model">foreign.rfq.email.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_foreign_rfq_email_wizard"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

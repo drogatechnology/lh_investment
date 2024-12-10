@@ -8,6 +8,7 @@ class LocalPurchaseRequest(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin", "analytic.mixin"]
     _rec_name = 'reference'
 
+    name = fields.Char(string='PR Name')
     rfq_ids = fields.One2many('local.create.rfq', 'purchase_request_id', string='RFQs')  # Link to related RFQs
     rfq_count = fields.Integer(string="", compute="_compute_rfq_count")
     reference = fields.Char(string='REFERENCE', required=True, copy=False, readonly=True, default=lambda self: _("New"))
@@ -29,7 +30,7 @@ class LocalPurchaseRequest(models.Model):
         ('pmapproved', 'PM Approved'),        
         ('done', 'CEO Approved'),
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
     
     PURCHASE_TYPE_SELECTION = [
         ('goods', 'Goods'),
@@ -48,8 +49,18 @@ class LocalPurchaseRequest(models.Model):
     
     
     
-  
+    # @api.onchange('store_requestion_id')
+    # def _onchange_store_requestion_id(self):
+    #     if self.store_requestion_id:
+    #         self.purchase_type = self.store_requestion_id.purchase_type
+    #     else:
+    #         self.purchase_type = False
     
+    
+  
+   
+
+
 
     @api.depends('state', 'rfq_ids')
     def _compute_show_create_rfq_button(self):
@@ -119,45 +130,92 @@ class LocalPurchaseRequest(models.Model):
             'target': 'current',
         }
 
-    # Action to submit the request
+    # Reusable method to schedule activity
+    def schedule_activity_for_group(self, group_xml_id, summary, note):
+        """Schedule an activity for all users in the specified group."""
+        group = self.env.ref(group_xml_id)
+        for user in group.users:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=user.id,
+                summary=summary,
+                note=note,
+            )
+
+    # Actions for state transitions
     def action_submit(self):
         self.ensure_one()
         if not self.line_ids:
             raise ValidationError(_("Please add at least one product line before submitting the request."))
         self.write({'state': 'submitted'})
-        
-    
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_pm_manager',
+            summary="Local Purchase Request Submitted",
+            note="A local purchase request has been submitted and requires review."
+        )
 
-    # Action to approve the request
     def action_approve(self):
         self.ensure_one()
         if not self.approved_by:
             self.write({'approved_by': self.env.user.id})
         self.write({'state': 'approved'})
-        
-    # Action approve budget
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_finance_manager',
+            summary="Request Verified",
+            note="The request has been verified and needs budget approval."
+        )
+
     def action_budget_approve(self):
         self.ensure_one()
         self.write({'state': 'budget'})
-        
-     # Action approve budget
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_ceo',
+            summary="Budget Approved",
+            note="The budget has been approved and is awaiting final approval from the CEO."
+        )
+
     def action_pm_approve(self):
         self.ensure_one()
         self.write({'state': 'pmapproved'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_user',
+            summary="PM Approval Completed",
+            note="The PM has approved the request. The process can now proceed."
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'PM Approval',
+                'message': f"Request approved: {self.name or 'No Reference Provided'}",
+                'type': 'info',
+                'sticky': False,
+            }
+        }
 
-    # Action to mark the request as done
     def action_done(self):
         self.ensure_one()
         self.write({'state': 'done'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_user',
+            summary="Request Finalized",
+            note="The request has been finalized and approved by the CEO."
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Completion',
+                'message': f"Request completed: {self.name or 'No Reference Provided'}",
+                'type': 'info',
+                'sticky': False,
+            }
+        }
 
-    # Action to cancel the request
     def action_cancel(self):
-        self.ensure_one()
-        self.write({'state': 'cancelled'})
-        
-     # Action to reset to draft
+        self.write({'state': 'cancel'})
+
     def action_reset_to_draft(self):
-        self.ensure_one()
         self.write({'state': 'draft'})
         
     @api.depends('requested_by')
@@ -180,6 +238,13 @@ class LocalPurchaseRequestLine(models.Model):
     quantity = fields.Float(string='Quantity', required=True)
     uom_id = fields.Many2one('uom.uom', string='Unit of Measure', compute='_compute_uom_id', store=True, readonly=True)
     budgetary_position = fields.Many2one('account.budget.post', string="Budget Category")
+    
+    available_product_ids = fields.Many2many(
+        'product.product', 
+        string='Available Products', 
+        compute='_compute_available_product_ids', 
+        store=False
+    )
 
     
     @api.depends('product_id')
@@ -205,62 +270,18 @@ class LocalPurchaseRequestLine(models.Model):
     
     
     
+    # @api.depends('request_id.store_requestion_id')
+    # def _compute_available_product_ids(self):
+    #     """ Compute the available products from the related Purchase Request. """
+    #     for line in self:
+    #         if line.request_id.store_requestion_id:
+    #             line.available_product_ids = line.request_id.store_requestion_id.line_ids.mapped('product_id')
+    #         else:
+    #             line.available_product_ids = self.env['product.product'].browse()
 
 
 
 
-# class ResUsers(models.Model):
-#     _inherit = 'res.users'
-
-#     is_user = fields.Boolean(string="User")
-#     is_pm_manager = fields.Boolean(string="PM Manager")
-#     is_finance_manager = fields.Boolean(string="Finance Manager")
-#     is_ceo = fields.Boolean(string="CEO")
-
-
-#     def toggle_user_group(self):
-#         group_user = self.env.ref('custom_purchase_order.group_local_purchase_request_user')
-#         if self.is_user and group_user not in self.groups_id:
-#             self.groups_id = [(4, group_user.id)]
-#         elif not self.is_user and group_user in self.groups_id:
-#             self.groups_id = [(3, group_user.id)]
-
-#     def toggle_department_manager_group(self):
-#         group_dept_manager = self.env.ref('custom_purchase_order.group_local_purchase_request_pm_manager')
-#         if self.is_pm_manager and group_dept_manager not in self.groups_id:
-#             self.groups_id = [(4, group_dept_manager.id)]
-#         elif not self.is_pm_manager and group_dept_manager in self.groups_id:
-#             self.groups_id = [(3, group_dept_manager.id)]
-
-#     def toggle_finance_manager_group(self):
-#         group_finance_manager = self.env.ref('custom_purchase_order.group_local_purchase_request_finance_manager')
-#         if self.is_finance_manager and group_finance_manager not in self.groups_id:
-#             self.groups_id = [(4, group_finance_manager.id)]
-#         elif not self.is_finance_manager and group_finance_manager in self.groups_id:
-#             self.groups_id = [(3, group_finance_manager.id)]
-
-#     def toggle_ceo_group(self):
-#         group_ceo = self.env.ref('custom_purchase_order.group_local_purchase_request_ceo')
-#         if self.is_ceo and group_ceo not in self.groups_id:
-#             self.groups_id = [(4, group_ceo.id)]
-#         elif not self.is_ceo and group_ceo in self.groups_id:
-#             self.groups_id = [(3, group_ceo.id)]
-
-#     def write(self, vals):
-#         # Call the super method first to prevent recursion
-#         res = super(ResUsers, self).write(vals)
-
-#         # Only toggle groups if those fields have been updated
-#         if 'is_user' in vals:
-#             self.toggle_user_group()
-#         if 'is_pm_manager' in vals:
-#             self.toggle_department_manager_group()
-#         if 'is_finance_manager' in vals:
-#             self.toggle_finance_manager_group()
-#         if 'is_ceo' in vals:
-#             self.toggle_ceo_group()
-
-#         return res
 
 
 

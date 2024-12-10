@@ -26,18 +26,7 @@ class PurchaseOrder(models.Model):
     loading_unloading_cost = fields.Float(string="Loading & Unloading")
     release_date_from_customs_delivery = fields.Date(string="Delivery to Warehouse")
     
-    CONTAINER_TYPE_SELECTION = [
-        ('returned', 'Returned'),
-        ('notreturned', 'Not Returned'),
-        
-    ]
-    
-    margin_order = fields.Selection(
-        selection=CONTAINER_TYPE_SELECTION,
-        string="Container Deposit",
-        required=True,
-          # Set a default value if needed
-    )
+   
     
     
 class PurchaseOrder(models.Model):

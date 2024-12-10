@@ -23,12 +23,15 @@ class PurchaseOrder(models.Model):
         ('local', 'Local Purchase'),
         ('foreign', 'Foreign Purchase'),
         ('direct', 'Direct Purchase')
+        
     ], string='Purchase Type',default = 'local')
 
     reference = fields.Char(string='REFERENCE', required=True, copy=False, readonly=True, default=lambda self: _("New"))
 
+    
+    @api.model
     def create(self, vals):
-        """ Override create method to set unique reference for purchase order and purchase type based on context. """
+        """Override create method to set unique reference for purchase order and purchase type based on context."""
         # Set default reference if it's 'New'
         if vals.get('reference', _('New')) == _('New'):
             vals['reference'] = self.env['ir.sequence'].next_by_code('purchase.order') or _('New')
@@ -41,9 +44,9 @@ class PurchaseOrder(models.Model):
             vals['purchase_type'] = 'foreign'
         elif context_purchase_type == 'direct':
             vals['purchase_type'] = 'direct'
-
-        # Log the purchase type being used
-        _logger.info("Creating Purchase Order with purchase_type: %s", vals.get('purchase_type'))
+        # else:
+        #     # Default value for purchase_type if no valid context is provided
+        #     vals['purchase_type'] = 'local'
 
         # Create the purchase order
         order = super(PurchaseOrder, self).create(vals)
@@ -56,10 +59,11 @@ class PurchaseOrder(models.Model):
         elif order.purchase_type == 'direct':
             order.name = self.env['ir.sequence'].next_by_code('direct.purchase.order.sequence') or '/'
 
-        # Log the order creation
-        _logger.info("Created Purchase Order: %s with name: %s", order.id, order.name)
-
         return order
+    
+    
+    
+   
 
 
     
@@ -94,33 +98,7 @@ class PurchaseOrder(models.Model):
         return po
 
     
-    # def create_po_from_rfq(self, rfq_id):
-    #     """Creates a Purchase Order from the given Local RFQ."""
-    #     rfq = self.env['local.create.rfq'].browse(rfq_id)
-    #     if not rfq:
-    #         return
-
-    #     po_vals = {
-    #         'rfq_request_id': rfq.id,
-    #         'purchase_type': 'local',
-    #         'partner_id': rfq.vendor_id.id,
-    #     }
-
-    #     # Create the purchase order
-    #     po = self.create(po_vals)
-
-    #     # Copy RFQ lines to the PO lines
-    #     for rfq_line in rfq.line_ids:
-    #         po_line_vals = {
-    #             'order_id': po.id,
-    #             'product_id': rfq_line.product_id.id,
-    #             'product_qty': rfq_line.quantity,
-    #             'price_unit': rfq_line.price_unit,
-    #             'date_planned': fields.Datetime.now(),
-    #         }
-    #         self.env['purchase.order.line'].create(po_line_vals)
-
-    #     return po
+   
 
     def create_po_from_without_rfq(self, request_id):
         """Creates a Purchase Order from the given Direct Purchase Request."""

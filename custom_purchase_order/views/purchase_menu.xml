@@ -152,9 +152,15 @@
         <field name="sequence" eval="20"/>
     </record>
 
+    <record id="direct_procurement_menu" model="ir.ui.menu">
+        <field name="name">Direct Procurement</field>
+        <field name="parent_id" ref="purchase.menu_purchase_root"/>
+        <field name="sequence" eval="11"/>
+    </record>
+
     <record id="direct_purchase_order_menu" model="ir.ui.menu">
         <field name="name">Direct Purchase Orders</field>
-        <field name="parent_id" ref="local_procurement_menu"/>
+        <field name="parent_id" ref="direct_procurement_menu"/>
         <field name="action" ref="action_direct_purchase_order"/>
     </record>
 

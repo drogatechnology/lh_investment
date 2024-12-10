@@ -21,26 +21,40 @@
             <field name="arch" type="xml">
                 <form string="Local RFQ">
                     <header>
+
+                        
+                            
+                        <button name="action_prepare_rfq" type="object" string="Submit RFQ" class="btn-primary"
+                                groups="custom_purchase_order.group_local_purchase_request_user, custom_purchase_order.group_local_purchase_request_ceo"
+                                states="preparedby"/>
+
+                        <button name="action_approve_rfq" type="object" string="Approve RFQ" class="btn-primary"
+                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"
+                                states="approverfq"/>
+
+
                         <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
                                 groups="custom_purchase_order.group_local_purchase_request_user, custom_purchase_order.group_local_purchase_request_ceo"
                                 states="draft"/>
-                        <button name="action_send" type="object" string="Committe Approve" class="btn-success"
+                        <button name="action_send" type="object" string="Approve Winner" class="btn-success"
                                 groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"
                                 states="confirmed"/>
 
                         <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-secondary"
-                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"/>
+                                attrs="{'invisible': [('state', 'not in', ['draft', 'confirmed'])]}"/>
 
                         <button name="action_cancel" type="object" string="Cancel" class="btn-danger"
-                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"/>
+                                groups="custom_purchase_order.group_local_purchase_request_pm_manager, custom_purchase_order.group_local_purchase_request_ceo"
+                                states="cancelled"/>
 
-                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,sent,cancelled"/>
+                        <field name="state" widget="statusbar"/>
                     </header>
 
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="action_create_po" type="object" icon="fa-file-text-o"
                                     attrs="{'invisible': [('state', '!=', 'sent')]}">
+                                    
                                 <div class="o_stat_info">
                                     <span class="o_stat_value">Create PO</span>
                                 </div>
@@ -73,7 +87,7 @@
                                 <field name="request_date"/>
                                 <field name="requested_by"/>
                                 <field name="request_department"/>                                
-                                <field name="approved_by"/>
+                                <field name="approved_by" attrs="{'invisible': [('state', 'in', ['preparedby', 'draft'])]}"/>
                             </group> 
                             <group>
                                 <field name="remark"/>
@@ -82,7 +96,17 @@
                                 <field name="purchase_type" readonly="1"/>
 
                             </group>
-                            <group >                                
+                            <group  string="Details for RFQ Report" >  
+
+                                <field name="prepared_by" 
+                                        attrs="{
+                                            'invisible': [('state', 'not in', ['preparedby', 'approverfq'])], 
+                                            'readonly': [('state', '=', 'approverfq')]
+                                        }"/>
+                                <field name="checked_by" attrs="{'invisible': [('state', '!=', 'approverfq')]}"/>
+                                <field name="authorized_by" attrs="{'invisible': [('state', '!=', 'approverfq')]}"/>
+                                
+
                             </group>
                             <group >
 
@@ -172,7 +196,7 @@
 
         <!-- Menu item for Local RFQ -->
         <menuitem id="menu_local_create_rfq"
-                  name="Local Request for Quotation"
+                  name="Local RFQ"
                   parent="local_procurement_menu"
                   sequence="2"
                   action="action_local_create_rfq"/>

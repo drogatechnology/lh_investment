@@ -44,7 +44,7 @@ class LocalPaymentRequest(models.Model):
         ('budget', 'Budget Approved'),  
         ('pmapproved', 'Payment requested'),        
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
     
     payment_status = fields.Selection([
         ('paid', 'Request Approve'),
@@ -124,7 +124,8 @@ class LocalPaymentRequest(models.Model):
             raise UserError("Approval threshold not set. Please configure the threshold in the settings.")
         
         # Determine the new state based on the threshold comparison
-        new_state = 'approved' if self.total_amount_etb > threshold.amount_limit else 'done'
+        amount_exceeds = self.total_amount_etb < threshold.amount_limit
+        new_state = 'approved' if not amount_exceeds else 'done'
 
         # Update the state and approved_by fields
         self.write({
@@ -132,18 +133,24 @@ class LocalPaymentRequest(models.Model):
             'approved_by': self.env.user.id if not self.approved_by else self.approved_by.id,
         })
         
+        # Prepare notification message
+        if amount_exceeds:
+            message = f"Successfully Approved. Payment Reference: {self.payment_reference or 'N/A'}"
+        else:
+            message = f"Amount exceeds the approval limit; sent to CEO for approval: {self.payment_reference or 'N/A'}"
+        
         # Return a notification for clarity
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Approval Process',
-                'message': "Amount exceeds the approval limit; sent to CEO for approval." if new_state == 'done' else "Amount is within the approval limit; sent for budget approval.",
+                'message': message,
                 'type': 'info',
                 'sticky': False,
             }
         }
-        
+
     def action_done(self):
         self.ensure_one()
         self.write({'state': 'done'})

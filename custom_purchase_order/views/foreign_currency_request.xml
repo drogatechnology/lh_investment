@@ -27,14 +27,16 @@
 
 
                      <button name="action_submit" type="object" string="Submit" class="btn-primary"
-                            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                            groups="custom_purchase_order.group_foreign_purchase_request_user, custom_purchase_order.group_foreign_purchase_request_ceo"
+                            states="draft"/>
 
-                    <button name="action_queue" type="object" string="Mark as Done" class="btn-primary"
-                            attrs="{'invisible': [('state', '!=', 'queued')]}"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            groups="custom_purchase_order.group_foreign_purchase_request_pm_manager, custom_purchase_order.group_foreign_purchase_request_ceo"
+                            states="queued"/>
 
                     <!-- Approve button, visible in 'submitted' state -->
-                    <button name="action_approve" type="object" string="Approve" class="btn-success"
-                            attrs="{'invisible': [('state', '!=', 'queued')]}"/>
+                    <!-- <button name="action_approve" type="object" string="Approve" class="btn-success"
+                            attrs="{'invisible': [('state', '!=', 'queued')]}"/> -->
 
                     <!-- Done button, visible in 'approved' state -->
                     
@@ -57,10 +59,16 @@
 
                 <!-- Main content of the form -->
                 <sheet>
+
+                    <div class="oe_title">
+                        <h1>
+                             <field name="foreign_currency_request_reference" readonly="1"/>
+                        </h1>
+                    </div>
                     <group>
                         <group>
 
-                            <field name="foreign_currency_request_reference" string="Reference" readonly="1"/>
+                            <!-- <field name="foreign_currency_request_reference" string="Reference" readonly="1"/> -->
                             <field name="foreign_rfq_id" string="RFQ reference"/>
                             <field name="requested_by" string="Requested By"/>
                             <field name="request_department" string="Department"/>
@@ -92,8 +100,8 @@
                         </group>
                         <group  string="Bank">
                             <field name="approved_date" string="Approved Date"/>
-                            <field name="bank" string="Budget Position"/>
-                            <field name="branch" string="Budget Account"/>
+                            <field name="bank" string="Bank"/>
+                            <field name="branch" string="Branch"/>
                             
                         </group>
                         
@@ -107,6 +115,11 @@
                         
                     </group>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

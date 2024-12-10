@@ -22,6 +22,10 @@ class LocalCreateRFQ(models.Model):
     technical_remark = fields.Char(string="Technical Remark")
    
     company_id= fields.Many2one('res.company', string="Company")
+    
+    prepared_by = fields.Many2one('res.users', string="Prepared By")
+    checked_by = fields.Many2one('res.users', string="Checked By")
+    authorized_by = fields.Many2one('res.users', string="Authorized By")
 
     
     rfq_date = fields.Date(string='RFQ Date', default=fields.Date.context_today, required=True)
@@ -35,11 +39,13 @@ class LocalCreateRFQ(models.Model):
     show_create_po_button = fields.Boolean(string="Show Create PO Button", default=True)
 
     state = fields.Selection([
-        ('draft', 'Draft'),
+        ('preparedby', 'Prepare RFQ'),
+        ('approverfq', 'Approve RFQ'),
+        ('draft', 'Print RFQ'),
         ('confirmed', 'Confirmed'),
         ('sent', 'Approved'),
         ('cancelled', 'Cancelled'),
-    ], string='State', default='draft')
+    ], string='State', default='preparedby')
 
     po_ids = fields.One2many('purchase.order', 'rfq_request_id', string='POs')
     local_po_created = fields.Boolean(string="PO Created", default=False)
@@ -89,6 +95,9 @@ class LocalCreateRFQ(models.Model):
         for line in self.line_ids:
             if not line.vendor_id:
                 raise UserError(_("Please enter a vendor for each line before confirming."))
+            if not line.price_unit:
+                raise UserError(_("Please enter a price unit for each line before confirming."))
+        
 
         # If all checks pass, update the state
         self.write({'state': 'confirmed'})
@@ -112,6 +121,29 @@ class LocalCreateRFQ(models.Model):
         self.ensure_one()
         self.write({'state': 'draft'})
         self.line_ids.write({'winner': False})
+        
+    def action_prepare_rfq(self):
+        self.ensure_one()
+        self.write({'state': 'approverfq'})
+        
+    def action_approve_rfq(self):
+        self.ensure_one()
+        self.write({'state': 'draft'})
+        
+    @api.model
+    def get_report_action(self, docids, data=None):
+        """
+        Restrict report execution if state is not 'approverfq'.
+        """
+        records = self.browse(docids)
+        # Check the state of each record
+        if any(record.state != 'approverfq' for record in records):
+            raise UserError("You cannot print the RFQ unless the state is 'Approved RFQ'.")
+        
+        # Proceed with the report if all records meet the condition
+        return super(LocalCreateRFQ, self).get_report_action(docids, data)
+        
+    
         
     def action_create_po(self):
         """ Create Purchase Orders from the RFQ for each vendor with winning lines, if the state is 'approved'. """
@@ -166,49 +198,6 @@ class LocalCreateRFQ(models.Model):
    
    
    
-    # def action_create_po(self):
-    #     """ Create Purchase Orders from the RFQ for each vendor with winning lines. """
-    #     self.ensure_one()
-
-    #     # Filter lines with 'win' status
-    #     winning_lines = self.line_ids.filtered(lambda line: line.winner == 'win')
-
-    #     if not winning_lines:
-    #         raise ValidationError(_("You cannot create a PO without any winning lines."))
-
-    #     # Group winning lines by vendor
-    #     vendors = winning_lines.mapped('vendor_id')
-
-    #     # Create a PO for each vendor with all their respective winning lines
-    #     for vendor in vendors:
-    #         # Filter the winning lines for the current vendor
-    #         vendor_lines = winning_lines.filtered(lambda line: line.vendor_id == vendor)
-
-    #         # Prepare the values for the Purchase Order with all lines for this vendor
-    #         po_values = {
-    #             'rfq_request_id': self.id,  # Link the PO to the RFQ
-    #             'partner_id': vendor.id,  # Set the vendor from the winning lines
-    #             'date_order': fields.Date.today(),  # Set the order date
-    #             'order_line': [(0, 0, {
-    #                 'product_id': line.product_id.id,
-    #                 'product_qty': line.quantity,
-    #                 'price_unit': line.price_unit,
-    #                 'name': line.product_id.name or '',  # Add product description
-    #                 'date_planned': fields.Date.today(),  # Set planned date
-    #             }) for line in vendor_lines],  # Combine all the vendor's winning lines as order lines
-    #             'rfq_reference': self.reference,  # Pass the RFQ reference to the PO
-    #         }
-
-    #         # Create the Purchase Order for the vendor (only one per vendor)
-    #         self.env['purchase.order'].create(po_values)
-
-    #     # Mark the RFQ as PO created
-    #     self.local_po_created = True
-
-    #     # Optionally hide the 'Create PO' button after creating the POs
-    #     self.show_create_po_button = False
-
-    #     return True
 
         
     
@@ -352,7 +341,7 @@ class LocalCreateRFQLine(models.Model):
         self.ensure_one()
         
         # Check if RFQ state is draft; if so, do not proceed
-        if self.rfq_id.state == 'draft':
+        if self.rfq_id.state != 'confirmed':
             raise ValidationError(_("You cannot accept until approved"))
 
         # Check for missing fields
@@ -426,6 +415,9 @@ class LocalCreateRFQLine(models.Model):
                         self.quantity = request_lines[0].quantity
                     else:
                         self.quantity = 0.0
+
+
+
 
 
 

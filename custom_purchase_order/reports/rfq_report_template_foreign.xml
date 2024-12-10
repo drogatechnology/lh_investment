@@ -1,0 +1,156 @@
+<odoo>
+    <template id="report_template_foreign">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <main>
+                        <!-- Header -->
+                        <div class="row">
+                            <h1 style="text-align: center; color: purple;">Request for Quotation</h1>
+                        </div>
+                        <div style="flex: 1; text-align: left;">
+                            <strong style="color: purple;">Reference:</strong>
+                            <t t-esc="doc.foreign_reference or 'N/A'"/>
+                        </div>
+                        <hr/>
+
+                        <!-- Vendor and Company Information -->
+                        <div style="margin-top: 20px;">
+                            <group>
+                                <div style="float: right; width: 48%; padding-left: 2%;">
+                                    <!-- Vendor Information -->
+                                    <strong style="color: purple;">Vendor: </strong>
+                                    <t t-esc="doc.vendor_id.name or 'N/A'"/>
+                                    <br/>
+                                    <!-- <strong style="color: purple;">Address: </strong>
+                                    <t t-esc="doc.vendor_id.partner_id.street or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">Phone: </strong>
+                                    <t t-esc="doc.vendor_id.partner_id.phone or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">Email: </strong>
+                                    <t t-esc="doc.vendor_id.partner_id.email or 'N/A'"/> -->
+                                </div>
+
+                                <div style="float: left; width: 48%; padding-right: 2%;">
+
+                                    <!-- Company Information (optional, you can uncomment if needed) -->
+                                    <strong style="color: purple;">Company: </strong>
+                                    <t t-esc="doc.company_id.name or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">Address: </strong>
+                                    <t t-esc="doc.company_id.street or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">VAT: </strong>
+                                    <t t-esc="doc.company_id.vat or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">Phone: </strong>
+                                    <t t-esc="doc.company_id.phone or 'N/A'"/>
+                                    <br/>
+                                    <strong style="color: purple;">Email: </strong>
+                                    <t t-esc="doc.company_id.email or 'N/A'"/>
+                                </div>
+                            </group>
+                        </div>
+                        <br style="clear: both;"/>
+                        <hr/>
+
+                        <!-- Product Table -->
+                        <div style="margin-top: 20px;">
+                            <table class="table table-sm" style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid black;">
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Product</th>
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Quantity</th>
+                                        <th style="text-align: left; border-right: 1px solid black; color: purple;">Unit Price</th>
+                                        <th style="text-align: left; color: purple;">Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.line_ids" t-as="line">
+                                        <tr>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.product_id.display_name or ''"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.quantity if line.quantity != 0.0 else ''"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.price_unit if line.price_unit != 0.0 else ''"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="line.quantity * line.price_unit if (line.quantity * line.price_unit) != 0.0 else ''"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                       
+
+                    </main>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_template_foreign" model="ir.actions.report">
+        <field name="name">Foreign RFQ</field>
+        <field name="model">foreign.create.rfq</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_purchase_order.report_template_foreign</field>
+    </record>
+</odoo>
+
+
+
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_template_foreign">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <h2>Request for Quotation</h2>
+                    <p><strong>Vendor:</strong> <t t-esc="doc.vendor_id.name"/></p>
+                    <p><strong>Date:</strong> <t t-esc="doc.request_date"/></p>
+                    <p><strong>RFQ Reference:</strong> <t t-esc="doc.foreign_reference"/></p>
+                    
+                    <h3>Details:</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                         <tbody>
+                                    <t t-foreach="doc.line_ids" t-as="line">
+                                       <tr>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.product_id.display_name or ''"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.quantity if line.quantity != 0.0 else ''"/>
+                                            </td>
+                                            <td style="border-right: 1px solid black;">
+                                                <t t-esc="line.price_unit if line.price_unit != 0.0 else ''"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="line.quantity * line.price_unit if (line.quantity * line.price_unit) != 0.0 else ''"/>
+                                            </td>
+                                         </tr>
+
+                                    </t>
+                                </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo> -->

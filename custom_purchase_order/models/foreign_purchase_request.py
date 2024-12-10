@@ -34,7 +34,7 @@ class ForeignPurchaseRequest(models.Model):
         ('pmapproved', 'PM Approved'),        
         ('done', 'CEO Approved'),
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
     
   
 
@@ -98,12 +98,31 @@ class ForeignPurchaseRequest(models.Model):
             'target': 'current',
         }
 
+     # Reusable method to schedule activity
+    def schedule_activity_for_group(self, group_xml_id, summary, note):
+        """Schedule an activity for all users in the specified group."""
+        group = self.env.ref(group_xml_id)
+        for user in group.users:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=user.id,
+                summary=summary,
+                note=note,
+            )
+    
+    
+    
     # Action to submit the request
     def action_submit(self):
         self.ensure_one()
         if not self.line_ids:
             raise ValidationError(_("Please add at least one product line before submitting the request."))
         self.write({'state': 'submitted'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_foreign_purchase_request_pm_manager',
+            summary="Foreign Purchase Request Submitted",
+            note="A Foreign purchase request has been submitted and requires review."
+        )
         
     
 
@@ -113,16 +132,31 @@ class ForeignPurchaseRequest(models.Model):
         if not self.approved_by:
             self.write({'approved_by': self.env.user.id})
         self.write({'state': 'approved'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_foreign_purchase_request_finance_manager',
+            summary="Request Verified",
+            note="The request has been verified and needs budget approval."
+        )
         
     # Action approve budget
     def action_budget_approve(self):
         self.ensure_one()
         self.write({'state': 'budget'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_foreign_purchase_request_ceo',
+            summary="Budget Approved",
+            note="The budget has been approved and is awaiting final approval from the CEO."
+        )
         
      # Action approve budget
     def action_pm_approve(self):
         self.ensure_one()
         self.write({'state': 'pmapproved'})
+        self.schedule_activity_for_group(
+            'custom_purchase_order.group_local_purchase_request_user',
+            summary="PM Approval Completed",
+            note="The PM has approved the request. The process can now proceed."
+        )
 
     # Action to mark the request as done
     def action_done(self):

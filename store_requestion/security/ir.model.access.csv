@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_store_requestion_request,access_store_requestion_request,store_requestion.model_store_requestion_request,base.group_user,1,1,1,1
+access_store_requestion_request_line,access_store_requestion_request_line,store_requestion.model_store_requestion_request_line,base.group_user,1,1,1,1

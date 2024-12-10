@@ -27,7 +27,7 @@ class WithoutRFQLocalPurchase(models.Model):
         ('pmapproved', 'PM Approved'),        
         ('done', 'CEO Approved'),
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
     
 
     purchase_type = fields.Selection(

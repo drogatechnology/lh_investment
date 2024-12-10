@@ -8,7 +8,7 @@
                 <page string="Margins" name="margins_page">
                     <field name="margin_order_ids" widget="one2many_list" mode="tree,form">
                         <tree editable="bottom">
-                            <field name="margin_order" />
+                            <field name="margin_order_create" />
                             <field name="margin_percentage" />
                             <field name="calculation" />
                             <field name="usd_amount" />

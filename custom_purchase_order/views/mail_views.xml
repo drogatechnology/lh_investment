@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+
+        <!-- Define the tree view for mail.mail -->
+        <record id="view_custom_mail_mail_tree" model="ir.ui.view">
+            <field name="name">mail.mail.tree</field>
+            <field name="model">mail.mail</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="subject"/>
+                    <field name="email_from"/>
+                    <field name="email_to"/>
+                    <field name="date"/>
+                    <field name="state"/>  <!-- Display the state of the email -->
+                </tree>
+            </field>
+        </record>
+
+    </data>
+</odoo>

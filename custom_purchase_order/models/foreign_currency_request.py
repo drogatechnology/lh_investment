@@ -16,21 +16,21 @@ class ForeignCurrencyRequest(models.Model):
     
     name = fields.Char(string='Payment Request')
     proforma_invoice = fields.Many2one('account.analytic.account', string="Cost Center", help="Select the cost center associated with this RFQ")   
-    requested_by = fields.Many2one('res.users', string="Requested By")
+    requested_by = fields.Many2one('res.users', string="Requested By",tracking=True)
     request_department = fields.Many2one('hr.department', string='Department')
-    request_date = fields.Date(string="Request Date")
-    currency_id = fields.Many2one('res.currency', string="Currency", required=True, default=lambda self: self.env.ref('base.USD', raise_if_not_found=False))
-    purpose = fields.Char(string="Purpose")
+    request_date = fields.Date(string="Request Date",tracking=True)
+    currency_id = fields.Many2one('res.currency', string="Currency", required=True, default=lambda self: self.env.ref('base.USD', raise_if_not_found=False),tracking=True)
+    purpose = fields.Char(string="Purpose",tracking=True)
     nbe_number = fields.Float(string="NBE", default=1.00)
-    vendor_id = fields.Many2one('res.partner', string='Supplier', required=True)  
-    payment_due_date = fields.Date(string="Payment Due Date")
-    price_amount = fields.Float(string='Total Amount USD', required=True)
+    vendor_id = fields.Many2one('res.partner', string='Supplier', required=True,tracking=True)  
+    payment_due_date = fields.Date(string="Payment Due Date",tracking=True)
+    price_amount = fields.Float(string='Total Amount USD', required=True,tracking=True)
     exchange_rate = fields.Float(string="Exchange Rate", readonly=True)
     total_amount_etb = fields.Float(string='Total Amount ETB', required=True, compute='_compute_total_amount_etb', readonly=True)
     amount_in_word = fields.Char(string="Amount In Words", compute='_compute_amount_in_words', readonly=True)
     approved_date = fields.Date(string="Approved Date")
-    bank = fields.Many2one('account.budget.post', string="Budget Position")
-    branch = fields.Many2one('account.account', string="Budget Account")
+    bank = fields.Many2one('res.bank', string="Bank",tracking=True)
+    branch = fields.Char(string="Branch",tracking=True)
     
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -38,7 +38,7 @@ class ForeignCurrencyRequest(models.Model):
         ('on_progress', 'On Progress'),      
         ('approved', 'Approved'),       
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
 
     @api.onchange('currency_id')
     def _onchange_currency_id(self):
@@ -72,15 +72,15 @@ class ForeignCurrencyRequest(models.Model):
     def action_submit(self):
         self.ensure_one()
         self.write({'state': 'queued'})
+        
 
-    def action_queue(self):
-        self.ensure_one()
-        self.write({'state': 'queued'})
+    # def action_queue(self):
+    #     self.ensure_one()
+    #     self.write({'state': 'approved'})
 
     def action_approve(self):
         self.ensure_one()
-        if not self.approved_by:
-            self.write({'approved_by': self.env.user.id})
+        
         self.write({'state': 'approved'})
 
     def action_cancel(self):

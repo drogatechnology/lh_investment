@@ -83,38 +83,7 @@
                             <field name="issue_date"/>
                             <field name="state"/>
                         </tree>
-                        <!-- <form string="LC Details">
-                            <header>
-                                
-                                <button name="action_activate" type="object" string="Activate" class="btn-secondary"
-                                        attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-
-                                
-                                <button name="action_expire" type="object" string="Expire" class="btn-danger"
-                                        attrs="{'invisible': [('state', '!=', 'active')]}"/>
-
-                                
-                                <button name="action_close" type="object" string="Close" class="btn-warning"
-                                        attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
-
-                               
-                                <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
-                                        attrs="{'invisible': [('state', 'not in', ('active', 'expired'))]}"/>
-
-                                <field name="state" widget="statusbar" statusbar_visible="draft,active,expired,closed"/>
-                            </header>
-                            <group>
-                                <field name="existing_purchase_order_id" readonly="1"/>
-                                <field name="lc_number"/>
-                                <field name="bank"/>
-                                <field name="branch"/>
-                                <field name="issue_date"/>
-                            </group>
-                            <footer>
-                                <button string="Save" type="object" name="action_save" class="btn-primary"/>
-                                <button string="Discard" type="object" name="action_discard" class="btn-secondary" special="cancel"/>
-                            </footer>
-                        </form> -->
+                       
                     </field>
                 </page>
             </xpath>

@@ -35,11 +35,13 @@
 
                     <!-- Cancel Button: Visible to PM Manager and CEO, available in any state -->
                     <button name="action_cancel" type="object" string="Cancel" class="btn-danger"
-                            groups="custom_purchase_order.group_foreign_purchase_request_pm_manager, custom_purchase_order.group_foreign_purchase_request_ceo"/>
+                            groups="custom_purchase_order.group_foreign_purchase_request_pm_manager, custom_purchase_order.group_foreign_purchase_request_ceo"
+                            attrs="{'invisible': [('state', '=', 'draft')]}"/>
 
                     <!-- Reset to Draft Button: Visible to PM Manager, Finance Manager, and CEO, available in any state -->
                     <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="btn-secondary"
-                            groups="custom_purchase_order.group_foreign_purchase_request_pm_manager, custom_purchase_order.group_foreign_purchase_request_finance_manager, custom_purchase_order.group_foreign_purchase_request_ceo"/>
+                            groups="custom_purchase_order.group_foreign_purchase_request_pm_manager, custom_purchase_order.group_foreign_purchase_request_finance_manager, custom_purchase_order.group_foreign_purchase_request_ceo"
+                            attrs="{'invisible': [('state', '=', 'draft')]}"/>
                     <field name="state" widget="statusbar"/>
                 </header>
 

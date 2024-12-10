@@ -146,7 +146,7 @@
 
     <!-- Action to open Without RFQ Local Purchase requests -->
     <record id="action_without_rfq_local_purchase" model="ir.actions.act_window">
-        <field name="name">Without RFQ Local Purchases</field>
+        <field name="name">Direct Purchase Request</field>
         <field name="res_model">without.rfq.local.purchase</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="view_without_rfq_local_purchase_tree"/>
@@ -155,8 +155,8 @@
 
     <!-- Menu item to access Without RFQ Local Purchases -->
     <menuitem id="menu_withoutrfq_purchase_request"
-              name="Purchase Requests without RFQ"
-              parent="local_procurement_menu"
+              name="Direct Purchase Requests"
+              parent="direct_procurement_menu"
               sequence="2"
               action="action_without_rfq_local_purchase"/>
 </odoo>

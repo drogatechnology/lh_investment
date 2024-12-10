@@ -38,6 +38,11 @@
                         <field name="state" widget="statusbar" statusbar_visible="draft,queued,on_progress,approved,cancelled" string="Status"/>
                     </group>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

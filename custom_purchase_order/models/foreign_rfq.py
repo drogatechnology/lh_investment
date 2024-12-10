@@ -1,9 +1,10 @@
 import base64
 import io
-from xlsxwriter import Workbook
+import xlsxwriter
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.exceptions import UserError
+from io import BytesIO
 
 class ForeignCreateRFQ(models.Model):
     _name = 'foreign.create.rfq'
@@ -33,6 +34,8 @@ class ForeignCreateRFQ(models.Model):
     show_create_po_button = fields.Boolean(string="Show Create PO Button", default=True)
     order_id = fields.Many2one('purchase.order', string='Order Reference', ondelete='cascade')
     
+    vendor_email = fields.Char(string="Vendor Email", compute="_compute_vendor_email", store=True)
+    port_of_loading = fields.Char(string="Port of Loading")
     currency_request_ids = fields.One2many(
         'foreign.currency.request',  # The model we're linking to
         'foreign_rfq_reference',  # Corresponding Many2one field in foreign.currency.request
@@ -51,8 +54,16 @@ class ForeignCreateRFQ(models.Model):
         ('confirmed', 'Confirmed'),
         ('sent', 'Approved'),
         ('cancelled', 'Cancelled'),
-    ], default='draft', string='Status')
+    ], default='draft', string='Status',tracking=True)
 
+    @api.depends('vendor_id')
+    def _compute_vendor_email(self):
+        for record in self:
+            record.vendor_email = record.vendor_id.email if record.vendor_id else ''
+
+   
+
+    
     @api.depends('line_ids.price_total')
     def _compute_total_amount(self):
         for rfq in self:
@@ -132,53 +143,137 @@ class ForeignCreateRFQ(models.Model):
             'target': 'current',
         }
         
-    def generate_rfq_excel(self):
-        output = io.BytesIO()
-        workbook = Workbook(output)
-        worksheet = workbook.add_worksheet('RFQ Details')
+   
+    
+    
+    def _generate_excel_file(self):
+        # Create an Excel file using xlsxwriter
+        excel_data = BytesIO()  # Make sure this is a BytesIO object
+        workbook = xlsxwriter.Workbook(excel_data)
+        worksheet = workbook.add_worksheet()
 
-        # Set headers
-        headers = ['Vendor Name', 'Date', 'Product', 'Quantity', 'Unit Price', 'Total']
-        for col, header in enumerate(headers):
-            worksheet.write(0, col, header)
+        # Get company information (e.g., company name, email, etc.)
+        company = self.company_id
+        company_name = company.name if company else "N/A"
+        company_email = company.email if company and company.email else "N/A"
+        
+        # Merge the first two rows for company name and the title
+        worksheet.merge_range('A1:G1', company_name, workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'font_size': 24}))
+        worksheet.merge_range('A2:G2', 'Request For Quotation', workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'font_size': 22}))
+        
+        # Add static RFQ details
+        worksheet.write('A4', 'RFQ Reference:')
+        worksheet.write('B4', f"{self.foreign_reference}")
+        worksheet.write('A5', 'Supplier:')
+        worksheet.write('B5', self.vendor_id.name)
+        worksheet.write('A6', 'Currency:')
+        worksheet.write('B6', 'USD')  # This can be dynamic if needed
+        
+        # Add a blank row for spacing
+        worksheet.write('A7', '')
 
-        # Fill data
-        row = 1
-        worksheet.write(row, 0, self.vendor_id.name)
-        worksheet.write(row, 1, fields.Date.today())
-        for line in self.rfq_line_ids:
-            worksheet.write(row, 2, line.product_id.name)
-            worksheet.write(row, 3, line.quantity)
-            worksheet.write(row, 4, line.price_unit)
-            worksheet.write(row, 5, line.price_subtotal)
+        # Add the header for the products table
+        worksheet.write('A8', 'S.No')
+        worksheet.write('B8', 'Product')
+        worksheet.write('C8', 'Unit')
+        worksheet.write('D8', 'Qty')
+        worksheet.write('E8', 'Unit Price')
+        worksheet.write('F8', 'Total Price')
+        worksheet.write('G8', 'Remark')
+
+        # Define the data format for the table header
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#D9EAD3', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+
+        # Apply table header format
+        worksheet.set_row(7, None, header_format)  # Row 7 corresponds to the header
+
+        # Start filling product details below the header
+        row = 9  # Start from row after the header
+        total_amount = 0  # To calculate total price
+        
+        for index, line in enumerate(self.line_ids, start=1):
+            worksheet.write(row, 0, index)  # S.No
+            worksheet.write(row, 1, line.product_id.name)  # Product Name
+            worksheet.write(row, 2, line.uom_id.name)  # Unit (UOM)
+            worksheet.write(row, 3, line.quantity)  # Quantity
+            worksheet.write(row, 4, line.price_unit)  # Unit Price
+            total_price = line.quantity * line.price_unit  # Calculate Total Price
+            worksheet.write(row, 5, total_price)  # Total Price
+            worksheet.write(row, 6, '')  # Remark (Leave empty for now)
+            total_amount += total_price  # Add to overall total amount
             row += 1
 
-        workbook.close()
-        output.seek(0)
+        # Add a row for Total Price
+        worksheet.write(row, 4, 'Total Price')
+        worksheet.write(row, 5, total_amount)
 
-        # Encode file to base64 to attach in email
-        return base64.b64encode(output.read())
-
-        
-        
-    def action_send_rfq_email(self):
-        self.ensure_one()
-        email_template = self.env.ref('custom_purchase_order.foreign_rfq_email_template')
-
-        # Generate Excel and attach
-        excel_data = self.generate_rfq_excel()
-        attachment = self.env['ir.attachment'].create({
-            'name': f"RFQ_{self.foreign_reference}.xlsx",
-            'type': 'binary',
-            'datas': excel_data,
-            'res_model': 'foreign.create.rfq',
-            'res_id': self.id,
-            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        # Create a table (from A1 to G and last row of data)
+        worksheet.add_table(0, 0, row, 6, {
+            'name': 'RFQ Table',
+            'columns': [
+                {'header': 'S.No'},
+                {'header': 'Product'},
+                {'header': 'Unit'},
+                {'header': 'Qty'},
+                {'header': 'Unit Price'},
+                {'header': 'Total Price'},
+                {'header': 'Remark'},
+            ],
         })
-        email_template.attachment_ids = [(4, attachment.id)]
 
-        # Send email
-        email_template.send_mail(self.id, force_send=True)
+        workbook.close()
+
+        # Move to the beginning of the BytesIO object before sending it
+        excel_data.seek(0)
+
+        # Return the BytesIO object itself instead of base64 encoded data
+        return excel_data
+
+
+    def action_open_email_wizard(self):
+        # Step 1: Generate the Excel file
+        excel_data = self._generate_excel_file()
+
+        # Step 2: Convert the Excel data to base64 directly from the BytesIO object
+        attachment_base64 = base64.b64encode(excel_data.read()).decode('utf-8')
+
+        # Step 3: Create the attachment in Odoo
+        attachment = self.env['ir.attachment'].create({
+            'name': f"RFQ_{self.foreign_reference}.xlsx",  # Name of the attachment (filename)
+            'datas': attachment_base64,  # Base64 encoded Excel file content
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # MIME type for Excel
+            'res_model': 'foreign.create.rfq',  # The model associated with the attachment
+            'res_id': self.id,  # The ID of the current RFQ record
+        })
+
+        # Step 4: Open the email compose wizard with the attachment
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'RFQ For Vendor',
+            'res_model': 'mail.compose.message',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_model': 'foreign.create.rfq',  # The model the email is associated with
+                'default_res_id': self.id,  # The specific RFQ record ID
+                'default_email_to': self.vendor_email,  # Vendor email address
+                'default_attachment_ids': [(4, attachment.id)],  # Attach the generated Excel file
+                'default_subject': f"Request For Quotation - {self.foreign_reference}",  # Static subject
+                'default_body_html': f"""
+                    Dear {self.vendor_id.name},<br/><br/>
+                    Here is an attachment with a request for quotation "{self.foreign_reference}" from "{self.env.user.company_id.name}".<br/><br/>
+                    If you have any questions, please do not hesitate to contact us.<br/><br/>
+                    Best regards,<br/>
+                    {self.env.user.name}
+                """,  # Static email body
+            },
+        }
+
+
+
+
+
+
         
     def action_create_and_open_currency_request(self):
         """Creates and opens a new foreign.currency.request form."""
@@ -215,7 +310,10 @@ class ForeignCreateRFQ(models.Model):
             'res_id': currency_request.id,  # Open the created record
             'target': 'current',  # Opens in a new modal window
         }
+        
+  
 
+    
 
     
 
@@ -233,6 +331,7 @@ class ForeignCreateRFQLine(models.Model):
     price_total = fields.Float(string='Total Price', compute='_compute_price_total', store=True)
     technical_by_percent = fields.Float(string="Technical(%)")
     winner = fields.Selection([('win', 'Win'), ('lost', 'Lost')], string="Winner")
+    hs_code = fields.Char(string="HS Code", related='product_id.product_tmpl_id.hs_code', readonly=True)
     
     available_product_ids = fields.Many2many('product.product', string='Available Products', compute='_compute_available_product_ids', store=False)
 

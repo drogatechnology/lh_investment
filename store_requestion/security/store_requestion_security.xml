@@ -1,0 +1,30 @@
+<odoo>
+    <!-- Create Custom Category -->
+    <record id="store_purchase_request_category" model="ir.module.category">
+        <field name="name">Store Request</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- Create Custom User Groups and Assign to Custom Category -->
+    <record id="group_store_purchase_request_user" model="res.groups">
+        <field name="name">Employee</field>
+        <field name="category_id" ref="store_purchase_request_category"/>
+    </record>
+
+    <record id="group_store_purchase_request_department_manager" model="res.groups">
+        <field name="name">DM Manager</field>
+        <field name="category_id" ref="store_purchase_request_category"/>
+    </record>
+
+    <record id="group_store_purchase_request_store_manager" model="res.groups">
+        <field name="name">Store Manager</field>
+        <field name="category_id" ref="store_purchase_request_category"/>
+    </record>
+
+    <record id="group_store_purchase_request_store_kepeer" model="res.groups">
+        <field name="name">Store Keeper</field>
+        <field name="category_id" ref="store_purchase_request_category"/>
+    </record>
+
+    
+</odoo>

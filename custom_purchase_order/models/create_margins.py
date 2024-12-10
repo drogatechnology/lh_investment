@@ -17,9 +17,9 @@ class PurchaseLCMargin(models.Model):
     usd_amount = fields.Float(string="USD")
     exchange_rate = fields.Float(string="Exchange Rate")
     etb_amount = fields.Float(string="ETB")
-    account = fields.Char(string="Account")
+    account = fields.Many2one('account.budget.post',string="Account")
     move_reference = fields.Char(string="Move Reference")
-    lc_reference = fields.Many2one('account.analytic.account', string="LC Reference")
+    lc_reference = fields.Many2one('purchase.order.lc', string="LC Reference")
     
     MARGIN_TYPE_SELECTION = [
         ('firstmargin', 'First Margin'),
@@ -27,31 +27,14 @@ class PurchaseLCMargin(models.Model):
         ('partialmargin', 'Partial Margin '),
     ]
     
-    margin_order = fields.Selection(
+    margin_order_create = fields.Selection(
         selection=MARGIN_TYPE_SELECTION,
         string="Margin Order",
         required=True,
           # Set a default value if needed
     )
     
-    # New Many2many field to hold LC references
-    # lc_reference_ids = fields.Many2many('purchase.order.lc', string="LC References",
-    #                                      domain="[('purchase_order_id', '=', purchase_order_id)]")
-
-    
-
-    # @api.depends('purchase_order_id')
-    # def _compute_lc_reference(self):
-    #     for record in self:
-    #         if record.purchase_order_id:
-    #             # Fetch related LC orders based on the purchase order
-    #             lc_orders = self.env['purchase.order.lc'].search([('purchase_order_id', '=', record.purchase_order_id.id)])
-    #             # Extract LC numbers into a list
-    #             lc_numbers = lc_orders.mapped('lc_number')
-    #             # Join them into a string for display
-    #             record.lc_reference = ', '.join(lc_numbers)
-    #         else:
-    #             record.lc_reference = ''
+  
                 
     @api.model
     def create(self, vals):
